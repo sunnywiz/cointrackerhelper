@@ -5,43 +5,55 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CointrackerIOHelper"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Cointracker.IO Helper" Height="450" Width="800" WindowState="Maximized">
     <DockPanel>
         <StackPanel DockPanel.Dock="Top">
-        <WrapPanel >
-            <Label>1. Load transaction history from Cointracker.IO so that we know what to not import again</Label>
-            <Button Name="ImportCointrackerHistory" Click="ImportCointrackerHistory_OnClick">Import Cointracker History</Button>
-        </WrapPanel>
-        <WrapPanel >
-            <Label FontWeight="ExtraBold">Voyager</Label>
-            <Label>A1. Contact Voyager Support to get CSV in their format</Label>
-            <Button Name="ImportVoyagerTrades" Click="ImportVoyagerTrades_OnClick">Import Voyager Format Here</Button>
+            <WrapPanel >
+                <Label>1. Load transaction history from Cointracker.IO so that we know what to not import again</Label>
+                <Button Name="ImportCointrackerHistory" Click="ImportCointrackerHistory_OnClick">Import Cointracker History</Button>
             </WrapPanel>
-        <WrapPanel MaxHeight="100">
-            <Label>A2. Choose the import wallet to match voyager</Label>
-            <TextBox Name="VoyagerName" Text="Voyager"
-                     TextChanged="VoyagerName_OnTextChanged"/>
-            <Label>matches:</Label>
-            <ListView Name="VoyagerWallets" />
-            <Label>Within</Label>
-            <TextBox Name="VoyagerMatchMinutes" Text="5"/>
-            <Label>minutes And then</Label>
-            <Button Name="MatchVoyager" Click="MatchVoyager_OnClick">Match Trades</Button>
-        </WrapPanel>
+            <WrapPanel >
+                <Label FontWeight="ExtraBold">Voyager</Label>
+                <Label>Contact Voyager Support to get CSV in their format</Label>
+                <Button Name="ImportVoyagerTrades" Click="ImportVoyagerTrades_OnClick">Import Voyager Format Here</Button>
+                <Label>And review proposed Trades</Label>
+            </WrapPanel>
+            <WrapPanel MaxHeight="100">
+                <Label FontWeight="ExtraBold">Matching</Label>
+                <Label>Type wallet name</Label>
+                <TextBox Name="MatchWalletName" Text="Voyager"
+                     TextChanged="MatchWalletName_OnTextChanged"/>
+                <Label>matches:</Label>
+                <ListView Name="MatchedWallets" />
+            </WrapPanel>
+            <WrapPanel>
+                <Label>Timestamp Delta Minutes:</Label>
+                <TextBox Name="MatchMinutes" Text="5"/>
+                <Label>Decimal Places:</Label>
+                <TextBox Name="MatchDecimals" Text="4"/>
+                <Label>minutes And then</Label>
+                <Button Name="MatchButton">Match</Button>
+            </WrapPanel>
         </StackPanel>
-        <TabControl>
-            <TabItem Name="CTTab" Header="CT Existing">
-                <DataGrid Name="CTExisting" AutoGenerateColumns="True"/>
-            </TabItem>
-            <TabItem Name="VoyagerTab" Header="Voyager">
-                <StackPanel Orientation="Horizontal">
-                <DataGrid Name="VGINGrid" AutoGenerateColumns="True"/>
-                <DataGrid Name="VGMatchGrid" AutoGenerateColumns="True"/>
-                </StackPanel>
-            </TabItem>
-            <TabItem Name="ExportTab" Header="Upload To CT">
-                <DataGrid Name="CTNew" AutoGenerateColumns="true"/>
-            </TabItem>
-        </TabControl>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <TabControl>
+                <TabItem Name="CTTab" Header="CT Existing">
+                    <DataGrid Name="CTExisting" AutoGenerateColumns="True"/>
+                </TabItem>
+                <TabItem Name="VoyagerTab" Header="Voyager">
+                    <DataGrid Name="VoyagerDataGrid" AutoGenerateColumns="True"/>
+                </TabItem>
+            </TabControl>
+            <TabControl Grid.Column="1">
+                <TabItem Name="CTNewTab" Header="Proposed">
+                    <DataGrid Name="ProposedGrid" AutoGenerateColumns="true"/>
+                </TabItem>
+                <TabItem Name="CTUpload" Header="CT Upload"/>
+            </TabControl>
+        </Grid>
     </DockPanel>
 </Window>

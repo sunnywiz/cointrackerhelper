@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using CsvHelper.Configuration.Attributes;
 
 namespace CointrackerIOHelper
@@ -49,6 +51,83 @@ namespace CointrackerIOHelper
             {
                 throw new NotSupportedException(transaction_type);
             }
+        }
+
+        public static List<CtImportRow> ConvertToCTImport(List<VoyagerRow> voyagerData)
+        {
+            var vd = voyagerData
+                .OrderBy(x => x.TransactionDate)
+                .ThenBy(x => x.base_asset)
+                .ThenBy(x => x.transaction_type)
+                .ToList();
+
+            var ret = new List<CtImportRow>();
+
+            foreach (var v in vd)
+            {
+                if (v.TransactionDate == null) continue;
+
+                var r = new CtImportRow()
+                {
+                    Date = v.TransactionDate.Value
+                };
+                switch (v.transaction_type)
+                {
+                    case "TRADE":
+                        if (v.transaction_direction == "Buy")
+                        {
+                            r.ReceivedCurrency = v.base_asset;
+                            r.ReceivedQuantity = v.quantity;
+                            r.SentCurrency = v.quote_asset;
+                            r.SentQuantity = v.net_amount; 
+                        } else if (v.transaction_direction == "Sell")
+                        {
+                            r.SentCurrency = v.base_asset;
+                            r.SentQuantity = v.quantity;
+                            r.ReceivedCurrency = v.quote_asset;
+                            r.ReceivedQuantity = v.net_amount;
+                        }
+
+                        ret.Add(r); 
+                        break; 
+                    case "BLOCKCHAIN":
+                        if (v.transaction_direction == "deposit")
+                        {
+                            r.ReceivedQuantity = v.quantity;
+                            r.ReceivedCurrency = v.base_asset; 
+                        } else if (v.transaction_direction == "withdrawal")
+                        {
+                            r.SentQuantity = v.quantity;   // have to add Fee to this
+                            r.SentCurrency = v.base_asset;  
+                        }
+
+                        ret.Add(r); 
+                        break; 
+                    case "FEE":
+                        if (v.transaction_direction == "withdrawal")
+                        {
+                            // should be the immediate previous
+                            var last = ret[ret.Count - 1];
+                            if (last.Date == v.TransactionDate && last.SentCurrency == v.base_asset)
+                            {
+                                // cointracking : inclusive of fee
+                                last.SentQuantity += v.quantity;
+                                last.FeeAmount = v.quantity;
+                                last.FeeCurrency = v.base_asset; 
+                            }
+                            else
+                            {
+                                throw new NotImplementedException("Don't know how to handle fee");
+                            }
+                        }
+
+                        break; 
+                    default:
+                        throw new NotImplementedException(v.transaction_type);
+                }
+            }
+
+            return ret; 
         }
     }
 }
