@@ -23,17 +23,24 @@
                      TextChanged="VoyagerName_OnTextChanged"/>
             <Label>matches:</Label>
             <ListView Name="VoyagerWallets" />
-            <Label>And then</Label>
+            <Label>Within</Label>
+            <TextBox Name="VoyagerMatchMinutes" Text="5"/>
+            <Label>minutes And then</Label>
             <Button Name="MatchVoyager" Click="MatchVoyager_OnClick">Match Trades</Button>
-            <TextBlock Name="VoyagerStatus">Status goes here</TextBlock>
         </WrapPanel>
         </StackPanel>
         <TabControl>
-            <TabItem Name="CTTab" Header="Cointracker">
-                <DataGrid Name="CTGrid" AutoGenerateColumns="True"/>
+            <TabItem Name="CTTab" Header="CT Existing">
+                <DataGrid Name="CTExisting" AutoGenerateColumns="True"/>
             </TabItem>
-            <TabItem Name="VoyagerInTab" Header="Voyager In">
+            <TabItem Name="VoyagerTab" Header="Voyager">
+                <StackPanel Orientation="Horizontal">
                 <DataGrid Name="VGINGrid" AutoGenerateColumns="True"/>
+                <DataGrid Name="VGMatchGrid" AutoGenerateColumns="True"/>
+                </StackPanel>
+            </TabItem>
+            <TabItem Name="ExportTab" Header="Upload To CT">
+                <DataGrid Name="CTNew" AutoGenerateColumns="true"/>
             </TabItem>
         </TabControl>
     </DockPanel>

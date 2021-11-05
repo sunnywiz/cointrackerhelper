@@ -4,7 +4,7 @@ using CsvHelper.Configuration.Attributes;
 
 namespace CointrackerIOHelper
 {
-    public class CTExportRow
+    public class CtExportRow
     {
         [Name("Date")]
         // Format: "01/31/2015 23:01:31"   intended to be UTC

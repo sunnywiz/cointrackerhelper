@@ -33,5 +33,22 @@ namespace CointrackerIOHelper
         public decimal quantity { get; set; }
         public decimal net_amount { get; set; }
         public decimal price { get; set; }
+
+        public CtImportRow ToCTImportRow()
+        {
+            if (transaction_type == "deposit")
+            {
+                return new CtImportRow()
+                {
+                    Date = this.TransactionDate.Value,
+                    ReceivedQuantity = this.quantity,
+                    ReceivedCurrency = this.base_asset
+                };
+            }
+            else
+            {
+                throw new NotSupportedException(transaction_type);
+            }
+        }
     }
 }

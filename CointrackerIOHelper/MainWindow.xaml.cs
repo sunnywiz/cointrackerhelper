@@ -17,7 +17,6 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using CsvHelper;
 using CsvHelper.Configuration;
-using CsvHelper.Configuration.Attributes;
 using Microsoft.Win32;
 
 namespace CointrackerIOHelper
@@ -27,14 +26,19 @@ namespace CointrackerIOHelper
     /// </summary>
     public partial class MainWindow : Window
     {
-        public CTData CTData { get; set; }
+        public CtData CTData { get; set; }
         public List<VoyagerRow> VoyagerData { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
-            CTData = new CTData();
+            
+            CTData = new CtData();
             VoyagerData = new List<VoyagerRow>();
+
+            CTImports = new List<CtImportRow>();
+            VoyagerMatches = new List<Tuple<CtExportRow, VoyagerRow>>();
+
             UpdateDependencyCTData();
         }
 
@@ -56,8 +60,8 @@ namespace CointrackerIOHelper
                     MissingFieldFound = null
                 });
                 CTData.Rows.Clear();
-                CTData.Rows.AddRange(csv.GetRecords<CTExportRow>());
-                CTGrid.ItemsSource = CTData.Rows;
+                CTData.Rows.AddRange(csv.GetRecords<CtExportRow>());
+                CTExisting.ItemsSource = CTData.Rows;
                 CTTab.IsSelected = true; 
                 UpdateDependencyCTData();
             }
@@ -119,7 +123,7 @@ namespace CointrackerIOHelper
                 });
                 VoyagerData.Clear();
                 VoyagerData.AddRange(csv.GetRecords<VoyagerRow>());
-                VoyagerInTab.IsSelected = true; 
+                VoyagerTab.IsSelected = true; 
                 VGINGrid.ItemsSource = VoyagerData;
                 UpdateDependencyVoyagerData(); 
             }
@@ -132,32 +136,6 @@ namespace CointrackerIOHelper
                                      && VoyagerWallets.Items.Count > 0;
         }
 
-        public class CTImportRow
-        {
-            [Name("Date")]
-            public string DateString { get; set; }
-            
-            [Ignore]
-            public DateTime Date { get; set; }
-
-            [Name("Received Quantity")]
-            public decimal? ReceivedQuantity { get; set; }
-            [Name("Received Currency")]
-            public string ReceivedCurrency { get; set; }
-            
-            [Name("Sent Quantity")]
-            public decimal? SentQuantity { get; set; }
-            [Name("Sent Currency")]
-            public string SentCurrency { get; set; }
-            
-            [Name("Fee Amount")]
-            public decimal? FeeAmount { get; set; }
-            [Name("Fee Currency")]
-            public string FeeCurrency { get; set; }
-            
-            [Name("Tag")]
-            public string Tag { get; set; }
-        }
 
         private void VoyagerName_OnTextChanged(object sender, TextChangedEventArgs e)
         {
@@ -171,35 +149,55 @@ namespace CointrackerIOHelper
             }
         }
 
+        public List<Tuple<CtExportRow, VoyagerRow>> VoyagerMatches { get; set; }
+        public List<CtImportRow> CTImports { get; set; }
+
         private void MatchVoyager_OnClick(object sender, RoutedEventArgs e)
         {
-            var low = new Dictionary<string,bool>();
-            foreach (var a in VoyagerWallets.Items) low[a.ToString()]=true; 
+            var listOfWallets = new Dictionary<string,bool>();
+            foreach (var a in VoyagerWallets.Items) listOfWallets[a.ToString()]=true;
+
+            double minutes = 5;
+            Double.TryParse(VoyagerMatchMinutes.Text, out minutes);
+
+            CTImports.Clear();
+            VoyagerMatches.Clear(); 
 
             foreach (var v in VoyagerData)
             {
                 if (v.transaction_direction == "deposit")
                 {
                     var m1 = CTData.Rows
-                        .Where(x => low.ContainsKey(x.ReceivedWallet) &&
+                        .Where(x => listOfWallets.ContainsKey(x.ReceivedWallet) &&
                                     x.ReceivedCurrency == v.base_asset)
                         .ToList();
                     var m2 = m1.Where(x=>
                                     x.ReceivedQuantity == v.quantity &&
                                     x.Date.HasValue && 
                                     v.TransactionDate.HasValue && 
-                                    Math.Abs((x.Date.Value-v.TransactionDate.Value).TotalMinutes)<30)
+                                    Math.Abs((x.Date.Value-v.TransactionDate.Value).TotalMinutes)<=minutes)
                         .ToList();
                     if (m2.Count == 1)
                     {
-                        Debug.WriteLine("Match");
+                        VoyagerMatches.Add(new Tuple<CtExportRow, VoyagerRow>(m2[0],v));
                     }
                     else
                     {
-                        Debug.WriteLine("No Match");
+                        CTImports.Add(v.ToCTImportRow());
                     }
                 }            
             }
+
+            VGMatchGrid.ItemsSource = VoyagerMatches.Select(x => new
+            {
+                CTDate = x.Item1.Date,
+                CTReceivedQty = x.Item1.ReceivedQuantity,
+                CTSentQty = x.Item1.SentQuantity,
+                VGDate = x.Item2.TransactionDate,
+                VGQty = x.Item2.quantity
+            }).ToList();
+
+            CTNew.ItemsSource = CTImports; 
         }
     }
 }

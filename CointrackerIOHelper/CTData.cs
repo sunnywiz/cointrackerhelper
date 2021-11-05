@@ -6,13 +6,13 @@ using System.Text;
 
 namespace CointrackerIOHelper
 {
-    public class CTData
+    public class CtData
     {
-        public List<CTExportRow> Rows { get; set; }
+        public List<CtExportRow> Rows { get; set; }
 
-        public CTData()
+        public CtData()
         {
-            Rows = new List<CTExportRow>();
+            Rows = new List<CtExportRow>();
         }
 
     }
