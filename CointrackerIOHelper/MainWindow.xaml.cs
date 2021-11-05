@@ -27,6 +27,7 @@ namespace CointrackerIOHelper
     public partial class MainWindow : Window
     {
         public List<CtExportRow> CtExistingData { get; set; }
+        public List<CtExportRow> CtExistingFilteredData { get; set; }
         public List<VoyagerRow> VoyagerData { get; set; }
         public List<CtImportRow> CtProposedData { get; set; }
 
@@ -35,6 +36,7 @@ namespace CointrackerIOHelper
             InitializeComponent();
             
             CtExistingData = new List<CtExportRow>();
+            CtExistingFilteredData = new List<CtExportRow>();
             VoyagerData = new List<VoyagerRow>();
             CtProposedData = new List<CtImportRow>();
 
@@ -60,7 +62,6 @@ namespace CointrackerIOHelper
                 });
                 CtExistingData.Clear();
                 CtExistingData.AddRange(csv.GetRecords<CtExportRow>());
-                CtExistingGrid.ItemsSource = CtExistingData;
                 CtExistingTab.IsSelected = true; 
                 UpdateDependencies();
             }
@@ -73,31 +74,51 @@ namespace CointrackerIOHelper
             // MatchedWallets depends on CTData having data and the MatchWalletName
             if (CtExistingData.Any())
             {
-                Dictionary<string, bool> a = new Dictionary<string, bool>();
-                foreach (var row in CtExistingData)
+                CtExistingFilteredData.Clear(); 
+                if (String.IsNullOrEmpty(MatchWalletName.Text))
                 {
-                    if (!String.IsNullOrEmpty(row.ReceivedWallet) &&
-                        row.ReceivedWallet.Contains(MatchWalletName.Text))
+                    CtExistingFilteredData.Clear(); 
+                    CtExistingFilteredData.AddRange(CtExistingData);
+                    MatchedWallets.Items.Clear();
+                }
+                else
+                {
+                    Dictionary<string, bool> a = new Dictionary<string, bool>();
+                    foreach (var row in CtExistingData)
                     {
-                        a[row.ReceivedWallet] = true; 
+                        bool match = false; 
+                        if (!String.IsNullOrEmpty(row.ReceivedWallet) &&
+                            row.ReceivedWallet.Contains(MatchWalletName.Text))
+                        {
+                            a[row.ReceivedWallet] = true;
+                            match = true; 
+                        }
+
+                        if (!String.IsNullOrEmpty(row.SentWallet) &&
+                            row.SentWallet.Contains(MatchWalletName.Text))
+                        {
+                            a[row.SentWallet] = true;
+                            match = true; 
+                        }
+
+                        if (match) CtExistingFilteredData.Add(row); 
                     }
 
-                    if (!String.IsNullOrEmpty(row.SentWallet) &&
-                        row.SentWallet.Contains(MatchWalletName.Text))
+                    MatchedWallets.Items.Clear();
+                    foreach (var b in a.Keys.OrderBy(x => x))
                     {
-                        a[row.SentWallet] = true; 
+                        MatchedWallets.Items.Add(b);
                     }
-                }
-                MatchedWallets.Items.Clear(); 
-                foreach (var b in a.Keys.OrderBy(x => x))
-                {
-                    MatchedWallets.Items.Add(b); 
                 }
             }
             else
             {
-               MatchedWallets.Items.Clear(); 
+               MatchedWallets.Items.Clear();
+               CtExistingFilteredData.Clear(); 
             }
+
+            CtExistingGrid.ItemsSource = null;
+            CtExistingGrid.ItemsSource = CtExistingFilteredData; 
 
             // MatchButton is dependent on Proposed Trades being there
             MatchButton.IsEnabled = CtProposedData?.Count > 0; 
@@ -157,12 +178,9 @@ namespace CointrackerIOHelper
             }
 
             CtExistingData.ForEach(x => x.MatchInfo = null);
-            CtProposedData.ForEach(x => x.MatchInfo = null); 
+            CtProposedData.ForEach(x => x.MatchInfo = null);
 
-            var source = CtExistingData
-                .Where(x => listOfWallets.Contains(x.ReceivedWallet)
-                            || listOfWallets.Contains(x.SentWallet))
-                .ToList();
+            var source = CtExistingFilteredData.ToList(); 
 
             double minutes = 5;
             Double.TryParse(MatchMinutes.Text, out minutes);
@@ -176,10 +194,12 @@ namespace CointrackerIOHelper
                                            Math.Abs((x.Date.Value - trade.Date).TotalMinutes) <= minutes).ToList();
                 if (m1.Count > 0)
                 {
+
                     var m2 = new List<CtExportRow>();
                     foreach (var m in m1)
                     {
                         int matchLevel = 0;
+                        var minuteLevel = Math.Abs((m.Date.Value - trade.Date).TotalMinutes);
 
                         if (trade.ReceivedCurrency != null &&
                             m.ReceivedCurrency == trade.ReceivedCurrency &&
@@ -214,18 +234,17 @@ namespace CointrackerIOHelper
                         if (matchLevel > 0)
                         {
                             // This is a MATCH
-                            trade.MatchInfo = "matched level " + matchLevel;
+                            trade.MatchInfo = $"{minuteLevel:N1}min match=" + matchLevel;
                             m.MatchInfo = trade.ToString(); 
                         }
                     }
                 }
             }
 
-            CtExistingGrid.ItemsSource = null;
-            CtExistingGrid.ItemsSource = CtExistingData;
-
             CtProposedGrid.ItemsSource = null;
             CtProposedGrid.ItemsSource = CtProposedData; 
+
+            UpdateDependencies();
         }
     }
 }

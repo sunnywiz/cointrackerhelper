@@ -28,7 +28,7 @@
             </WrapPanel>
             <WrapPanel>
                 <Label>Timestamp Delta Minutes:</Label>
-                <TextBox Name="MatchMinutes" Text="5"/>
+                <TextBox Name="MatchMinutes" Text="30"/>
                 <Label>Decimal Places:</Label>
                 <TextBox Name="MatchDecimals" Text="4"/>
                 <Label>minutes And then</Label>
