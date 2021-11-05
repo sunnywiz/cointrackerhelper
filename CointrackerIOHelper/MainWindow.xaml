@@ -24,7 +24,7 @@
             <Label>matches:</Label>
             <ListView Name="VoyagerWallets" />
             <Label>And then</Label>
-            <Button Name="MatchVoyager">Match Trades</Button>
+            <Button Name="MatchVoyager" Click="MatchVoyager_OnClick">Match Trades</Button>
             <TextBlock Name="VoyagerStatus">Status goes here</TextBlock>
         </WrapPanel>
         </StackPanel>

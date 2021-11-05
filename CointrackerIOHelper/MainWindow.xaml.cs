@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -131,23 +132,6 @@ namespace CointrackerIOHelper
                                      && VoyagerWallets.Items.Count > 0;
         }
 
-        private void MatchVoyagerData()
-        {
-            int skip = 0;
-            foreach (var a in VoyagerData)
-            {
-                if (a.TransactionDate.HasValue)
-                {
-                    if (CTData.Rows.Any(x => x.Date.HasValue && x.Date.Value == a.TransactionDate.Value))
-                    {
-                        skip++;
-                    }
-                }
-            }
-
-            VoyagerStatus.Text = "Skipped " + skip + " voyager rows because found by timestamp";
-        }
-
         public class CTImportRow
         {
             [Name("Date")]
@@ -184,6 +168,37 @@ namespace CointrackerIOHelper
             else
             {
                 VoyagerWallets?.Items?.Clear(); 
+            }
+        }
+
+        private void MatchVoyager_OnClick(object sender, RoutedEventArgs e)
+        {
+            var low = new Dictionary<string,bool>();
+            foreach (var a in VoyagerWallets.Items) low[a.ToString()]=true; 
+
+            foreach (var v in VoyagerData)
+            {
+                if (v.transaction_direction == "deposit")
+                {
+                    var m1 = CTData.Rows
+                        .Where(x => low.ContainsKey(x.ReceivedWallet) &&
+                                    x.ReceivedCurrency == v.base_asset)
+                        .ToList();
+                    var m2 = m1.Where(x=>
+                                    x.ReceivedQuantity == v.quantity &&
+                                    x.Date.HasValue && 
+                                    v.TransactionDate.HasValue && 
+                                    Math.Abs((x.Date.Value-v.TransactionDate.Value).TotalMinutes)<30)
+                        .ToList();
+                    if (m2.Count == 1)
+                    {
+                        Debug.WriteLine("Match");
+                    }
+                    else
+                    {
+                        Debug.WriteLine("No Match");
+                    }
+                }            
             }
         }
     }
