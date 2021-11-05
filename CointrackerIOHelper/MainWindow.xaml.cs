@@ -34,6 +34,7 @@ namespace CointrackerIOHelper
             InitializeComponent();
             CTData = new CTData();
             VoyagerData = new List<VoyagerRow>();
+            UpdateDependencyCTData();
         }
 
         private void ImportCointrackerHistory_OnClick(object sender, RoutedEventArgs e)
@@ -42,7 +43,8 @@ namespace CointrackerIOHelper
             {
                 CheckFileExists = true,
                 Title = "Cointracker.IO exported transactions",
-                DefaultExt = "csv"
+                DefaultExt = "csv", 
+                Filter = "Cointracker Files|*.csv"
             };
             if (a.ShowDialog()??false)
             {
@@ -56,13 +58,45 @@ namespace CointrackerIOHelper
                 CTData.Rows.AddRange(csv.GetRecords<CTExportRow>());
                 CTGrid.ItemsSource = CTData.Rows;
                 CTTab.IsSelected = true; 
-                UpdateDependencies();
+                UpdateDependencyCTData();
             }
         }
 
-        public void UpdateDependencies()
+        public void UpdateDependencyCTData()
         {
-            ImportVoyagerTrades.IsEnabled = CTData.Rows.Any();
+            if (CTData.Rows.Any())
+            {
+                ImportVoyagerTrades.IsEnabled = true;
+                Dictionary<string, bool> a = new Dictionary<string, bool>();
+                foreach (var row in CTData.Rows)
+                {
+                    if (!String.IsNullOrEmpty(row.ReceivedWallet) &&
+                        row.ReceivedWallet.Contains(VoyagerName.Text))
+                    {
+                        a[row.ReceivedWallet] = true; 
+                    }
+
+                    if (!String.IsNullOrEmpty(row.SentWallet) &&
+                        row.SentWallet.Contains(VoyagerName.Text))
+                    {
+                        a[row.SentWallet] = true; 
+                    }
+                }
+
+                VoyagerWallets.Items.Clear(); 
+                foreach (var b in a.Keys.OrderBy(x => x))
+                {
+                    VoyagerWallets.Items.Add(b); 
+                }
+
+                UpdateDependencyVoyagerData();
+            }
+            else
+            {
+                ImportVoyagerTrades.IsEnabled = false;
+                MatchVoyager.IsEnabled = false;
+                VoyagerWallets.Items.Clear(); 
+            }
         }
 
         private void ImportVoyagerTrades_OnClick(object sender, RoutedEventArgs e)
@@ -71,7 +105,8 @@ namespace CointrackerIOHelper
             {
                 CheckFileExists = true,
                 Title = "Voyager transactions",
-                DefaultExt = "csv"
+                DefaultExt = "csv", 
+                Filter = "Voyager transactions|*.csv"
             };
             if (a.ShowDialog() ?? false)
             {
@@ -85,12 +120,15 @@ namespace CointrackerIOHelper
                 VoyagerData.AddRange(csv.GetRecords<VoyagerRow>());
                 VoyagerInTab.IsSelected = true; 
                 VGINGrid.ItemsSource = VoyagerData;
-
-                // TODO SUNNY: need to move this AFTER you choose which wallet to look at
-                MatchVoyagerData(); 
-
-                UpdateDependencies();
+                UpdateDependencyVoyagerData(); 
             }
+        }
+
+        public void UpdateDependencyVoyagerData()
+        {
+            MatchVoyager.IsEnabled = VoyagerData.Count > 0 
+                                     && CTData.Rows.Count > 0 
+                                     && VoyagerWallets.Items.Count > 0;
         }
 
         private void MatchVoyagerData()
@@ -135,6 +173,18 @@ namespace CointrackerIOHelper
             
             [Name("Tag")]
             public string Tag { get; set; }
+        }
+
+        private void VoyagerName_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (CTData?.Rows?.Count != null && !String.IsNullOrEmpty(VoyagerName.Text))
+            {
+                UpdateDependencyCTData();
+            }
+            else
+            {
+                VoyagerWallets?.Items?.Clear(); 
+            }
         }
     }
 }

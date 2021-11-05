@@ -7,17 +7,27 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <DockPanel>
-        <WrapPanel MaxHeight="100" DockPanel.Dock="Top">
+        <StackPanel DockPanel.Dock="Top">
+        <WrapPanel >
             <Label>1. Load transaction history from Cointracker.IO so that we know what to not import again</Label>
             <Button Name="ImportCointrackerHistory" Click="ImportCointrackerHistory_OnClick">Import Cointracker History</Button>
         </WrapPanel>
-        <WrapPanel DockPanel.Dock="Top">
-            <Label FontWeight="ExtraBold">A. Voyager</Label>
-            <Label>Contact Voyager Support to get CSV in their format</Label>
-            <Button Name="ImportVoyagerTrades" IsEnabled="False" Click="ImportVoyagerTrades_OnClick">Import Voyager Format Here</Button>
-            <TextBlock Name="VoyagerStatus">status goes here</TextBlock>
-            <Button Name="ExportVoygaterToCT" IsEnabled="False">Export stuff to send to CT</Button>
+        <WrapPanel >
+            <Label FontWeight="ExtraBold">Voyager</Label>
+            <Label>A1. Contact Voyager Support to get CSV in their format</Label>
+            <Button Name="ImportVoyagerTrades" Click="ImportVoyagerTrades_OnClick">Import Voyager Format Here</Button>
+            </WrapPanel>
+        <WrapPanel MaxHeight="100">
+            <Label>A2. Choose the import wallet to match voyager</Label>
+            <TextBox Name="VoyagerName" Text="Voyager"
+                     TextChanged="VoyagerName_OnTextChanged"/>
+            <Label>matches:</Label>
+            <ListView Name="VoyagerWallets" />
+            <Label>And then</Label>
+            <Button Name="MatchVoyager">Match Trades</Button>
+            <TextBlock Name="VoyagerStatus">Status goes here</TextBlock>
         </WrapPanel>
+        </StackPanel>
         <TabControl>
             <TabItem Name="CTTab" Header="Cointracker">
                 <DataGrid Name="CTGrid" AutoGenerateColumns="True"/>
