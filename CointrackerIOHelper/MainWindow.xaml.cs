@@ -38,7 +38,7 @@ namespace CointrackerIOHelper
             VoyagerData = new List<VoyagerRow>();
             CTProposed = new List<CtImportRow>();
 
-            UpdateDependencyCTData();
+            UpdateDependencies();
         }
 
         private void ImportCointrackerHistory_OnClick(object sender, RoutedEventArgs e)
@@ -62,11 +62,11 @@ namespace CointrackerIOHelper
                 CTData.Rows.AddRange(csv.GetRecords<CtExportRow>());
                 CTExisting.ItemsSource = CTData.Rows;
                 CTTab.IsSelected = true; 
-                UpdateDependencyCTData();
+                UpdateDependencies();
             }
         }
 
-        public void UpdateDependencyCTData()
+        public void UpdateDependencies()
         {
             if (CTData.Rows.Any())
             {
@@ -99,6 +99,8 @@ namespace CointrackerIOHelper
                 ImportVoyagerTrades.IsEnabled = false;
                 MatchedWallets.Items.Clear(); 
             }
+            MatchButton.IsEnabled = CTProposed?.Count > 0; 
+
         }
 
         private void ImportVoyagerTrades_OnClick(object sender, RoutedEventArgs e)
@@ -128,16 +130,17 @@ namespace CointrackerIOHelper
                 CTProposed.AddRange(VoyagerRow.ConvertToCTImport(VoyagerData));
 
                 ProposedGrid.ItemsSource = CTProposed;
-                CTNewTab.IsSelected = true; 
+                CTNewTab.IsSelected = true;
+
+                UpdateDependencies(); 
             }
         }
-
 
         private void MatchWalletName_OnTextChanged(object sender, TextChangedEventArgs e)
         {
             if (CTData?.Rows?.Count != null && !String.IsNullOrEmpty(MatchWalletName.Text))
             {
-                UpdateDependencyCTData();
+                UpdateDependencies();
             }
             else
             {
