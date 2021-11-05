@@ -28,5 +28,20 @@ namespace CointrackerIOHelper
             
         [Name("Tag")]
         public string Tag { get; set; }
+
+        [Ignore]
+        public string MatchInfo { get; set; }
+
+        public override string ToString()
+        {
+            var a = $"{Date:G}/{SentCurrency}{SentQuantity:F4}=>{ReceivedCurrency}{ReceivedQuantity:F4}";
+            
+            if (FeeCurrency != null)
+            {
+                return $"{a}(FEE)";
+            }
+
+            return a; 
+        }
     }
 }

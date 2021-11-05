@@ -32,27 +32,27 @@
                 <Label>Decimal Places:</Label>
                 <TextBox Name="MatchDecimals" Text="4"/>
                 <Label>minutes And then</Label>
-                <Button Name="MatchButton">Match</Button>
+                <Button Name="MatchButton" Click="MatchButton_OnClick">Match</Button>
             </WrapPanel>
         </StackPanel>
         <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="1*"/>
-            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
             <TabControl>
-                <TabItem Name="CTTab" Header="CT Existing">
-                    <DataGrid Name="CTExisting" AutoGenerateColumns="True"/>
+                <TabItem Name="CtExistingTab" Header="CT Existing">
+                    <DataGrid Name="CtExistingGrid" AutoGenerateColumns="True"/>
                 </TabItem>
                 <TabItem Name="VoyagerTab" Header="Voyager">
                     <DataGrid Name="VoyagerDataGrid" AutoGenerateColumns="True"/>
                 </TabItem>
             </TabControl>
-            <TabControl Grid.Column="1">
-                <TabItem Name="CTNewTab" Header="Proposed">
-                    <DataGrid Name="ProposedGrid" AutoGenerateColumns="true"/>
+            <TabControl Grid.Row="1">
+                <TabItem Name="CtNewTab" Header="Proposed">
+                    <DataGrid Name="CtProposedGrid" AutoGenerateColumns="true"/>
                 </TabItem>
-                <TabItem Name="CTUpload" Header="CT Upload"/>
+                <TabItem Name="CtUploadTab" Header="CT Upload"/>
             </TabControl>
         </Grid>
     </DockPanel>

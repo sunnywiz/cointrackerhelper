@@ -40,5 +40,13 @@ namespace CointrackerIOHelper
         public string SentCurrency { get; set; }
         [Name("Sent Wallet")]
         public string SentWallet { get; set; }
+
+        [Name("Fee Amount")] 
+        public decimal? FeeAmount { get; set;  }
+        [Name("Fee Currency")]
+        public string FeeCurrency { get; set; } 
+
+        [Ignore]
+        public string MatchInfo { get; set; }
     }
 }

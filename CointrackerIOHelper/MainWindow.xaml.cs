@@ -26,17 +26,17 @@ namespace CointrackerIOHelper
     /// </summary>
     public partial class MainWindow : Window
     {
-        public CtData CTData { get; set; }
+        public List<CtExportRow> CtExistingData { get; set; }
         public List<VoyagerRow> VoyagerData { get; set; }
-        public List<CtImportRow> CTProposed { get; set; }
+        public List<CtImportRow> CtProposedData { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
             
-            CTData = new CtData();
+            CtExistingData = new List<CtExportRow>();
             VoyagerData = new List<VoyagerRow>();
-            CTProposed = new List<CtImportRow>();
+            CtProposedData = new List<CtImportRow>();
 
             UpdateDependencies();
         }
@@ -58,21 +58,23 @@ namespace CointrackerIOHelper
                     HasHeaderRecord = true, 
                     MissingFieldFound = null
                 });
-                CTData.Rows.Clear();
-                CTData.Rows.AddRange(csv.GetRecords<CtExportRow>());
-                CTExisting.ItemsSource = CTData.Rows;
-                CTTab.IsSelected = true; 
+                CtExistingData.Clear();
+                CtExistingData.AddRange(csv.GetRecords<CtExportRow>());
+                CtExistingGrid.ItemsSource = CtExistingData;
+                CtExistingTab.IsSelected = true; 
                 UpdateDependencies();
             }
         }
 
         public void UpdateDependencies()
         {
-            if (CTData.Rows.Any())
+            ImportVoyagerTrades.IsEnabled = true;  // can import at any time
+            
+            // MatchedWallets depends on CTData having data and the MatchWalletName
+            if (CtExistingData.Any())
             {
-                ImportVoyagerTrades.IsEnabled = true;
                 Dictionary<string, bool> a = new Dictionary<string, bool>();
-                foreach (var row in CTData.Rows)
+                foreach (var row in CtExistingData)
                 {
                     if (!String.IsNullOrEmpty(row.ReceivedWallet) &&
                         row.ReceivedWallet.Contains(MatchWalletName.Text))
@@ -86,21 +88,19 @@ namespace CointrackerIOHelper
                         a[row.SentWallet] = true; 
                     }
                 }
-
                 MatchedWallets.Items.Clear(); 
                 foreach (var b in a.Keys.OrderBy(x => x))
                 {
                     MatchedWallets.Items.Add(b); 
                 }
-
             }
             else
             {
-                ImportVoyagerTrades.IsEnabled = false;
-                MatchedWallets.Items.Clear(); 
+               MatchedWallets.Items.Clear(); 
             }
-            MatchButton.IsEnabled = CTProposed?.Count > 0; 
 
+            // MatchButton is dependent on Proposed Trades being there
+            MatchButton.IsEnabled = CtProposedData?.Count > 0; 
         }
 
         private void ImportVoyagerTrades_OnClick(object sender, RoutedEventArgs e)
@@ -126,11 +126,11 @@ namespace CointrackerIOHelper
                 VoyagerTab.IsSelected = true; 
                 VoyagerDataGrid.ItemsSource = VoyagerData;
 
-                CTProposed.Clear(); 
-                CTProposed.AddRange(VoyagerRow.ConvertToCTImport(VoyagerData));
+                CtProposedData.Clear(); 
+                CtProposedData.AddRange(VoyagerRow.ConvertToCTImport(VoyagerData));
 
-                ProposedGrid.ItemsSource = CTProposed;
-                CTNewTab.IsSelected = true;
+                CtProposedGrid.ItemsSource = CtProposedData;
+                CtNewTab.IsSelected = true;
 
                 UpdateDependencies(); 
             }
@@ -138,7 +138,7 @@ namespace CointrackerIOHelper
 
         private void MatchWalletName_OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            if (CTData?.Rows?.Count != null && !String.IsNullOrEmpty(MatchWalletName.Text))
+            if (CtExistingData?.Count != null && !String.IsNullOrEmpty(MatchWalletName.Text))
             {
                 UpdateDependencies();
             }
@@ -148,5 +148,84 @@ namespace CointrackerIOHelper
             }
         }
 
+        private void MatchButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            var listOfWallets = new List<string>();
+            foreach (var item in MatchedWallets.Items)
+            {
+                listOfWallets.Add(item.ToString());
+            }
+
+            CtExistingData.ForEach(x => x.MatchInfo = null);
+            CtProposedData.ForEach(x => x.MatchInfo = null); 
+
+            var source = CtExistingData
+                .Where(x => listOfWallets.Contains(x.ReceivedWallet)
+                            || listOfWallets.Contains(x.SentWallet))
+                .ToList();
+
+            double minutes = 5;
+            Double.TryParse(MatchMinutes.Text, out minutes);
+
+            int decimals = 4;
+            int.TryParse(MatchDecimals.Text, out decimals);
+
+            foreach (var trade in CtProposedData)
+            {
+                var m1 = source.Where(x => x.Date.HasValue &&
+                                           Math.Abs((x.Date.Value - trade.Date).TotalMinutes) <= minutes).ToList();
+                if (m1.Count > 0)
+                {
+                    var m2 = new List<CtExportRow>();
+                    foreach (var m in m1)
+                    {
+                        int matchLevel = 0;
+
+                        if (trade.ReceivedCurrency != null &&
+                            m.ReceivedCurrency == trade.ReceivedCurrency &&
+                            trade.ReceivedQuantity.HasValue &&
+                            m.ReceivedQuantity.HasValue &&
+                            Decimal.Compare(Math.Round(m.ReceivedQuantity.Value, decimals),
+                                Math.Round(trade.ReceivedQuantity.Value, decimals)) == 0)
+                        {
+                            matchLevel++;
+                        }
+
+                        if (trade.SentCurrency != null &&
+                            m.SentCurrency == trade.SentCurrency &&
+                            trade.SentQuantity.HasValue &&
+                            m.SentQuantity.HasValue &&
+                            Decimal.Compare(Math.Round(m.SentQuantity.Value, decimals),
+                                Math.Round(trade.SentQuantity.Value, decimals)) == 0)
+                        {
+                            matchLevel++; 
+                        }
+
+                        if (trade.FeeCurrency != null &&
+                            m.FeeCurrency == trade.SentCurrency &&
+                            trade.FeeAmount.HasValue &&
+                            m.FeeAmount.HasValue &&
+                            Decimal.Compare(Math.Round(m.FeeAmount.Value, decimals),
+                                Math.Round(trade.FeeAmount.Value, decimals)) == 0)
+                        {
+                            matchLevel++; 
+                        }
+
+                        if (matchLevel > 0)
+                        {
+                            // This is a MATCH
+                            trade.MatchInfo = "matched level " + matchLevel;
+                            m.MatchInfo = trade.ToString(); 
+                        }
+                    }
+                }
+            }
+
+            CtExistingGrid.ItemsSource = null;
+            CtExistingGrid.ItemsSource = CtExistingData;
+
+            CtProposedGrid.ItemsSource = null;
+            CtProposedGrid.ItemsSource = CtProposedData; 
+        }
     }
 }
