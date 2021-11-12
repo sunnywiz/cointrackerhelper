@@ -121,7 +121,9 @@ namespace CointrackerIOHelper
             CtExistingGrid.ItemsSource = CtExistingFilteredData; 
 
             // MatchButton is dependent on Proposed Trades being there
-            MatchButton.IsEnabled = CtProposedData?.Count > 0; 
+            MatchButton.IsEnabled = CtProposedData?.Count > 0;
+
+            ExportButton.IsEnabled = CtProposedData?.Any(x => String.IsNullOrEmpty(x.MatchInfo)) ?? false;
         }
 
         private void ImportVoyagerTrades_OnClick(object sender, RoutedEventArgs e)
@@ -245,6 +247,28 @@ namespace CointrackerIOHelper
             CtProposedGrid.ItemsSource = CtProposedData; 
 
             UpdateDependencies();
+        }
+
+        private void ExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            var sfd = new SaveFileDialog()
+            {
+                Filter = "Cointracker CSV|*.csv",
+                FileName = "upload_to_cointracker.csv"
+            };
+            if (sfd.ShowDialog() ?? false)
+            {
+                using (var sw = new StreamWriter(sfd.FileName))
+                {
+                    using (var csv = new CsvWriter(sw,new CsvConfiguration(CultureInfo.InvariantCulture)
+                    {
+                        HasHeaderRecord=true
+                    }))
+                    {
+                        csv.WriteRecords<CtImportRow>(CtProposedData.Where(x => String.IsNullOrEmpty(x.MatchInfo)));
+                    }
+                }
+            }
         }
     }
 }

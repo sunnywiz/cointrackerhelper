@@ -6,7 +6,7 @@ namespace CointrackerIOHelper
     public class CtImportRow
     {
         [Name("Date")]
-        public string DateString { get; set; }
+        public string DateString => Date.ToString("MM/dd/yyyy HH:mm:ss");
             
         [Ignore]
         public DateTime Date { get; set; }
