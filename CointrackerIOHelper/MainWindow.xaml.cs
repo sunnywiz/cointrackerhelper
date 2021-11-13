@@ -29,8 +29,8 @@ namespace CointrackerIOHelper
         public List<CtExportRow> CtExistingData { get; set; }
         public List<CtExportRow> CtExistingFilteredData { get; set; }
         public List<CtImportRow> CtProposedData { get; set; }
-
         public VoyagerHelper VoyagerHelper {  get; set; }
+        public CakeDefiHelper CakeDefiHelper { get; set; }
 
         public MainWindow()
         {
@@ -40,6 +40,7 @@ namespace CointrackerIOHelper
             CtExistingFilteredData = new List<CtExportRow>();
             CtProposedData = new List<CtImportRow>();
             VoyagerHelper = new VoyagerHelper();
+            CakeDefiHelper = new CakeDefiHelper();
 
             UpdateDependencies();
         }
@@ -139,6 +140,19 @@ namespace CointrackerIOHelper
 
                 CtProposedGrid.ItemsSource = CtProposedData;
                 CtNewTab.IsSelected = true;
+
+                UpdateDependencies(); 
+            }
+        }
+
+        private void ImportCakeDefiTrades_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (CakeDefiHelper.ChooseAndReadFile())
+            {
+                CakeDefiTab.IsSelected = true;
+                CakeDefiDataGrid.ItemsSource = CakeDefiHelper.Data;
+
+                // we do the conversion later. 
 
                 UpdateDependencies(); 
             }

@@ -14,9 +14,14 @@
             </WrapPanel>
             <WrapPanel >
                 <Label FontWeight="ExtraBold">Voyager</Label>
-                <Label>Contact Voyager Support to get CSV in their format</Label>
+                <Label>Contact Voyager Support to get CSV in their format and</Label>
                 <Button Name="ImportVoyagerTrades" Click="ImportVoyagerTrades_OnClick">Import Voyager Format Here</Button>
                 <Label>And review proposed Trades</Label>
+            </WrapPanel>
+            <WrapPanel>
+                <Label FontWeight="ExtraBold">Cake Defi</Label>
+                <Label>Transactions, export, and then </Label>
+                <Button Name="ImportCakeDefiTrades" Click="ImportCakeDefiTrades_OnClick">Import CakeDefi Format Here</Button>
             </WrapPanel>
             <WrapPanel MaxHeight="100">
                 <Label FontWeight="ExtraBold">Matching</Label>
@@ -50,6 +55,9 @@
                 </TabItem>
                 <TabItem Name="VoyagerTab" Header="Voyager">
                     <DataGrid Name="VoyagerDataGrid" AutoGenerateColumns="True"/>
+                </TabItem>
+                <TabItem Name="CakeDefiTab" Header="CakeDefi">
+                    <DataGrid Name="CakeDefiDataGrid" AutoGenerateColumns="True"/>
                 </TabItem>
             </TabControl>
             <TabControl Grid.Row="1">
