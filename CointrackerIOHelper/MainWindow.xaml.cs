@@ -28,8 +28,9 @@ namespace CointrackerIOHelper
     {
         public List<CtExportRow> CtExistingData { get; set; }
         public List<CtExportRow> CtExistingFilteredData { get; set; }
-        public List<VoyagerRow> VoyagerData { get; set; }
         public List<CtImportRow> CtProposedData { get; set; }
+
+        public VoyagerHelper VoyagerHelper {  get; set; }
 
         public MainWindow()
         {
@@ -37,8 +38,8 @@ namespace CointrackerIOHelper
             
             CtExistingData = new List<CtExportRow>();
             CtExistingFilteredData = new List<CtExportRow>();
-            VoyagerData = new List<VoyagerRow>();
             CtProposedData = new List<CtImportRow>();
+            VoyagerHelper = new VoyagerHelper();
 
             UpdateDependencies();
         }
@@ -128,29 +129,13 @@ namespace CointrackerIOHelper
 
         private void ImportVoyagerTrades_OnClick(object sender, RoutedEventArgs e)
         {
-            var a = new OpenFileDialog()
-            {
-                CheckFileExists = true,
-                Title = "Voyager transactions",
-                DefaultExt = ".csv", 
-                Filter = "Voyager transactions|*.csv"
-            };
-            if (a.ShowDialog() ?? false)
-            {
-                using var reader = new StreamReader(a.FileName);
-                using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
-                {
-                    HasHeaderRecord = true,
-                    MissingFieldFound = null
-                });
-                VoyagerData.Clear();
-                VoyagerData.AddRange(csv.GetRecords<VoyagerRow>());
+            if (VoyagerHelper.ChooseAndReadFile()) {             
 
                 VoyagerTab.IsSelected = true; 
-                VoyagerDataGrid.ItemsSource = VoyagerData;
+                VoyagerDataGrid.ItemsSource = VoyagerHelper.Data;
 
                 CtProposedData.Clear(); 
-                CtProposedData.AddRange(VoyagerRow.ConvertToCTImport(VoyagerData));
+                CtProposedData.AddRange(VoyagerHelper.ConvertToCTImport());
 
                 CtProposedGrid.ItemsSource = CtProposedData;
                 CtNewTab.IsSelected = true;
