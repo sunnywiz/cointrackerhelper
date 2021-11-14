@@ -44,7 +44,7 @@ namespace CointrackerIOHelper
             for (int orderIndex = 0; orderIndex < orderedData.Count; orderIndex++)
             {
                 Row cakeTrade = orderedData[orderIndex];
-                CtImportRow result1 = null; 
+                CtImportRow result1 = null;
                 if (cakeTrade.Operation == "Deposit")
                 {
                     result1 = new CtImportRow
@@ -54,9 +54,12 @@ namespace CointrackerIOHelper
                         ReceivedQuantity = cakeTrade.Amount
                     };
                 }
-                else if (cakeTrade.Operation == "Signup bonus")
+                else if (cakeTrade.Operation == "Signup bonus"
+                    || cakeTrade.Operation == "Freezer staking bonus"
+                    || cakeTrade.Operation == "Staking reward"
+                    || cakeTrade.Operation.StartsWith("Liquidity mining reward "))
                 {
-                    result1=new CtImportRow
+                    result1 = new CtImportRow
                     {
                         Date = cakeTrade.DateDate,
                         ReceivedCurrency = cakeTrade.CoinOrAsset,
@@ -85,8 +88,9 @@ namespace CointrackerIOHelper
                         // no fees
                     };
                     // mark the swap as well
-                    swapIn.ConvertInfo = result1.ToString(); 
-                } else if (cakeTrade.Operation.StartsWith("Add liquidity "))
+                    swapIn.ConvertInfo = result1.ToString();
+                }
+                else if (cakeTrade.Operation.StartsWith("Add liquidity "))
                 {
                     // after analyzing the official cointracking.info (rival) importer
                     // we expense going to BTCDFI and we get paid coming back
@@ -100,7 +104,8 @@ namespace CointrackerIOHelper
                     var t2 = orderedData.FirstOrDefault(x => x.Reference == cakeTrade.RelatedReferenceID);
                     t2.ConvertInfo = t2.ConvertInfo ?? "";
                     t2.ConvertInfo += $"{-cakeTrade.Amount} {cakeTrade.CoinOrAsset} ";
-                } else if (cakeTrade.Operation == "Added liquidity")
+                }
+                else if (cakeTrade.Operation == "Added liquidity")
                 {
                     // these are handled by "Added Liquidity DFI" as a taxable transaction
                     // we don't track the BTC-DFI things directly
@@ -110,7 +115,7 @@ namespace CointrackerIOHelper
                 if (result1 != null)
                 {
                     cakeTrade.ConvertInfo = result1.ToString();
-                    ret.Add(result1); 
+                    ret.Add(result1);
                 }
             }
 
