@@ -152,7 +152,11 @@ namespace CointrackerIOHelper
                 CakeDefiTab.IsSelected = true;
                 CakeDefiDataGrid.ItemsSource = CakeDefiHelper.Data;
 
-                // we do the conversion later. 
+                CtProposedData.Clear();
+                CtProposedData.AddRange(CakeDefiHelper.ConvertToCTImport());
+
+                CtProposedGrid.ItemsSource = CtProposedData;
+                CtNewTab.IsSelected = true;
 
                 UpdateDependencies(); 
             }
