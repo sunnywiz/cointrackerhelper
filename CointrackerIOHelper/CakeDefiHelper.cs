@@ -57,6 +57,7 @@ namespace CointrackerIOHelper
                 else if (cakeTrade.Operation == "Signup bonus"
                     || cakeTrade.Operation == "Freezer staking bonus"
                     || cakeTrade.Operation == "Staking reward"
+                    || cakeTrade.Operation == "Lending reward"
                     || cakeTrade.Operation.StartsWith("Liquidity mining reward "))
                 {
                     result1 = new CtImportRow
@@ -101,7 +102,28 @@ namespace CointrackerIOHelper
                         SentCurrency = cakeTrade.CoinOrAsset,
                         SentQuantity = -cakeTrade.Amount
                     };
-                    var t2 = orderedData.FirstOrDefault(x => x.Reference == cakeTrade.RelatedReferenceID);
+                    var t2 = orderedData.FirstOrDefault(x => x.Reference == cakeTrade.RelatedReferenceID &&
+                    x.Operation == "Added liquidity");
+                    if (t2 == null) throw new NotSupportedException("could not find AL target");
+
+                    t2.ConvertInfo = t2.ConvertInfo ?? "";
+                    t2.ConvertInfo += $"{-cakeTrade.Amount} {cakeTrade.CoinOrAsset} ";
+                }
+                else if (cakeTrade.Operation.StartsWith("Remove liquidity "))
+                {
+                    // after analyzing the official cointracking.info (rival) importer
+                    // we expense going to BTCDFI and we get paid coming back
+                    // which are both taxable
+                    result1 = new CtImportRow
+                    {
+                        Date = cakeTrade.DateDate,
+                        ReceivedCurrency = cakeTrade.CoinOrAsset,
+                        ReceivedQuantity = cakeTrade.Amount
+                    };
+                    var t2 = orderedData.FirstOrDefault(x => x.Reference == cakeTrade.RelatedReferenceID &&
+                    x.Operation == "Removed liquidity");
+                    if (t2 == null) throw new NotSupportedException("could not find RL target");
+
                     t2.ConvertInfo = t2.ConvertInfo ?? "";
                     t2.ConvertInfo += $"{-cakeTrade.Amount} {cakeTrade.CoinOrAsset} ";
                 }
@@ -109,6 +131,30 @@ namespace CointrackerIOHelper
                 {
                     // these are handled by "Added Liquidity DFI" as a taxable transaction
                     // we don't track the BTC-DFI things directly
+                } else if (cakeTrade.Operation == "Withdrawal") {
+                    result1 = new CtImportRow
+                    {
+                        Date = cakeTrade.DateDate,
+                        SentCurrency = cakeTrade.CoinOrAsset,
+                        SentQuantity = -cakeTrade.Amount
+                    };
+                    var t2 = orderedData.FirstOrDefault(x => x.RelatedReferenceID == cakeTrade.Reference &&
+                    x.Operation == "Withdrawal fee"); 
+                    if (t2 != null)
+                    {
+                        // i guess its possible there is a withdrawal with no fee
+                        result1.FeeAmount = -t2.Amount;
+                        result1.FeeCurrency = t2.CoinOrAsset;
+                        if (result1.FeeCurrency == result1.SentCurrency)
+                        {
+                            result1.SentQuantity += result1.FeeAmount;
+                        }
+                        t2.ConvertInfo = result1.ToString(); 
+                    }
+                }
+                else if (cakeTrade.Operation=="Withdrawal fee")
+                {
+                    // handled by Withdrawal
                 }
 
                 // Gather and mark result
