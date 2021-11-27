@@ -285,13 +285,13 @@ namespace CointrackerIOHelper
                 CointrackingInfoTab.IsSelected = true;
                 CointrackingInfoDataGrid.ItemsSource = CointrackingInfoHelper.Data;
 
-                //CtProposedData.Clear();
-                //CtProposedData.AddRange(VoyagerHelper.ConvertToCTImport());
+                CtProposedData.Clear();
+                CtProposedData.AddRange(CointrackingInfoHelper.ConvertToCTImport());
 
-                //CtProposedGrid.ItemsSource = CtProposedData;
-                //CtNewTab.IsSelected = true;
+                CtProposedGrid.ItemsSource = CtProposedData;
+                CtNewTab.IsSelected = true;
 
-                //UpdateDependencies();
+                UpdateDependencies();
             }
 
         }

@@ -19,7 +19,6 @@ namespace CointrackerIOHelper
             Data = new List<Row>();
         }
 
-
         public bool ChooseAndReadFile()
         {
             var a = new OpenFileDialog()
@@ -40,8 +39,48 @@ namespace CointrackerIOHelper
 
         public List<CtImportRow> ConvertToCTImport()
         {
+            var od = Data.OrderBy(x => x.DateDate).ToList();
             var ret = new List<CtImportRow>();
+
+            for (int i=0; i<od.Count; i++)
+            {
+                var row = od[i];
+                CtImportRow result1 = null; 
+                if (row.type=="Mining")
+                {
+                    result1 = new CtImportRow()
+                    {
+                        Date = row.DateDate,
+                        ReceivedCurrency = ConvertCurrency(row.buyCurrency),
+                        ReceivedQuantity = row.buyAmount,
+                        Tag= "mined"
+                    };
+                } else if (row.type=="Withdrawal")
+                {
+                    result1 = new CtImportRow()
+                    {
+                        Date = row.DateDate,
+                        SentCurrency = ConvertCurrency(row.sellCurrency),
+                        SentQuantity = row.sellAmount,
+                        FeeCurrency = ConvertCurrency(row.feeCurrency),
+                        FeeAmount = row.feeAmount
+                    };
+                }
+
+                if (result1 != null)
+                {
+                    row.ConvertInfo = result1.ToString();
+                    ret.Add(result1);
+                }
+            }
+
             return ret;
+        }
+        
+        public static string ConvertCurrency(string a)
+        {
+            if (a == "HNT2") return "HNT";
+            return a; 
         }
 
         public void ReadFile(string fileName)
@@ -63,8 +102,8 @@ namespace CointrackerIOHelper
             public decimal? buyAmount { get; set; }
             public string buyCurrency { get; set; }
             public decimal? sellAmount { get; set; }
-            public string sellCurrency {  get; set; }
-            public decimal? feeAmount { get; set; } 
+            public string sellCurrency { get; set; }
+            public decimal? feeAmount { get; set; }
             public string feeCurrency { get; set; }
             public string exchange { get; set; }
             public string tradeGroup { get; set; }
@@ -84,6 +123,9 @@ namespace CointrackerIOHelper
                     throw new NotSupportedException(DateString);
                 }
             }
+
+            [Ignore]
+            public string ConvertInfo { get; set; }
 
         }
     }
