@@ -10,6 +10,7 @@ using System.Linq;
 
 namespace CointrackerIOHelper
 {
+
     public class CakeDefiHelper : IFormatHelper<CakeDefiHelper.Row>
     {
         public CakeDefiHelper()

@@ -32,6 +32,8 @@ namespace CointrackerIOHelper
         public VoyagerHelper VoyagerHelper {  get; set; }
         public CakeDefiHelper CakeDefiHelper { get; set; }
 
+        public CointrackingInfoHelper CointrackingInfoHelper { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -41,6 +43,7 @@ namespace CointrackerIOHelper
             CtProposedData = new List<CtImportRow>();
             VoyagerHelper = new VoyagerHelper();
             CakeDefiHelper = new CakeDefiHelper();
+            CointrackingInfoHelper= new CointrackingInfoHelper();
 
             UpdateDependencies();
         }
@@ -272,6 +275,25 @@ namespace CointrackerIOHelper
                     }
                 }
             }
+        }
+
+        private void ImportCointrackingTrades_Click(object sender, RoutedEventArgs e)
+        {
+            if (CointrackingInfoHelper.ChooseAndReadFile())
+            {
+                
+                CointrackingInfoTab.IsSelected = true;
+                CointrackingInfoDataGrid.ItemsSource = CointrackingInfoHelper.Data;
+
+                //CtProposedData.Clear();
+                //CtProposedData.AddRange(VoyagerHelper.ConvertToCTImport());
+
+                //CtProposedGrid.ItemsSource = CtProposedData;
+                //CtNewTab.IsSelected = true;
+
+                //UpdateDependencies();
+            }
+
         }
     }
 }

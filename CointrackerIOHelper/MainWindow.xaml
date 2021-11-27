@@ -23,6 +23,11 @@
                 <Label>Transactions, export, and then </Label>
                 <Button Name="ImportCakeDefiTrades" Click="ImportCakeDefiTrades_OnClick">Import CakeDefi Format Here</Button>
             </WrapPanel>
+            <WrapPanel>
+                <Label FontWeight="ExtraBold">Cointracking Format Import</Label>
+                <Label>various sources export, then </Label>
+                <Button Name="ImportCointrackingTrades" Click="ImportCointrackingTrades_Click">Import Cointracking Format Here</Button>
+            </WrapPanel>
             <WrapPanel MaxHeight="100">
                 <Label FontWeight="ExtraBold">Matching</Label>
                 <Label>Type wallet name</Label>
@@ -58,6 +63,9 @@
                 </TabItem>
                 <TabItem Name="CakeDefiTab" Header="CakeDefi">
                     <DataGrid Name="CakeDefiDataGrid" AutoGenerateColumns="True"/>
+                </TabItem>
+                <TabItem Name="CointrackingInfoTab" Header="Cointracking.Info">
+                    <DataGrid Name="CointrackingInfoDataGrid" AutoGenerateColumns="True"/>
                 </TabItem>
             </TabControl>
             <TabControl Grid.Row="1">
