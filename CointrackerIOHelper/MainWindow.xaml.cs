@@ -32,6 +32,8 @@ namespace CointrackerIOHelper
         public VoyagerHelper VoyagerHelper {  get; set; }
         public CakeDefiHelper CakeDefiHelper { get; set; }
 
+        public CardanoYoroiHelper CardanoYoroiHelper { get; set; }
+
         public HNTCointrackingInfoHelper HNTCointrackingInfoHelper { get; set; }
 
         public MainWindow()
@@ -44,6 +46,7 @@ namespace CointrackerIOHelper
             VoyagerHelper = new VoyagerHelper();
             CakeDefiHelper = new CakeDefiHelper();
             HNTCointrackingInfoHelper= new HNTCointrackingInfoHelper();
+            CardanoYoroiHelper = new CardanoYoroiHelper();
 
             UpdateDependencies();
         }
@@ -282,8 +285,8 @@ namespace CointrackerIOHelper
             if (HNTCointrackingInfoHelper.ChooseAndReadFile())
             {
                 
-                CointrackingInfoTab.IsSelected = true;
-                CointrackingInfoDataGrid.ItemsSource = HNTCointrackingInfoHelper.Data;
+                HNTCointrackingInfoTab.IsSelected = true;
+                HNTCointrackingInfoDataGrid.ItemsSource = HNTCointrackingInfoHelper.Data;
 
                 CtProposedData.Clear();
                 CtProposedData.AddRange(HNTCointrackingInfoHelper.ConvertToCTImport());
@@ -294,6 +297,23 @@ namespace CointrackerIOHelper
                 UpdateDependencies();
             }
 
+        }
+
+        private void ImportCardanoYoroiTrades_Click(object sender, RoutedEventArgs e)
+        {
+            if (CardanoYoroiHelper.ChooseAndReadFile())
+            {
+                CardanoiYoroiTab.IsSelected = true;
+                CardanoYoroiDataGrid.ItemsSource = CardanoYoroiHelper.Data;
+
+                CtProposedData.Clear();
+                CtProposedData.AddRange(CardanoYoroiHelper.ConvertToCTImport());
+
+                CtProposedGrid.ItemsSource = CtProposedData;
+                CtNewTab.IsSelected = true;
+
+                UpdateDependencies();
+            }
         }
     }
 }

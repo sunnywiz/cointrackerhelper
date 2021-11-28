@@ -54,6 +54,15 @@
                         <DataGrid Name="HNTCointrackingInfoDataGrid" AutoGenerateColumns="True"/>
                     </DockPanel>
                 </TabItem>
+                <TabItem Name="CardanoiYoroiTab" Header="Cardano/Yoroi">
+                    <DockPanel Margin="5">
+                        <WrapPanel DockPanel.Dock="Top">
+                            <Label>Use Yoroi wallet to export all transactions and then</Label>
+                            <Button Name="ImportCardanoYoroiTrades" Click="ImportCardanoYoroiTrades_Click">Import Cardano CSV</Button>
+                        </WrapPanel>
+                        <DataGrid Name="CardanoYoroiDataGrid" AutoGenerateColumns="True"/>
+                    </DockPanel>
+                </TabItem>
             </TabControl>
             <TabControl Grid.Row="1" Grid.Column="0">
                 <TabItem Name="CtNewTab" Header="Review Proposed Trades">
