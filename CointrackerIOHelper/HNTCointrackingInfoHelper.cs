@@ -10,11 +10,11 @@ using System.Linq;
 
 namespace CointrackerIOHelper
 {
-    public class CointrackingInfoHelper : IFormatHelper<CointrackingInfoHelper.Row>
+    public class HNTCointrackingInfoHelper : IFormatHelper<HNTCointrackingInfoHelper.Row>
     {
         public List<Row> Data { get; set; }
 
-        public CointrackingInfoHelper()
+        public HNTCointrackingInfoHelper()
         {
             Data = new List<Row>();
         }
@@ -24,9 +24,9 @@ namespace CointrackerIOHelper
             var a = new OpenFileDialog()
             {
                 CheckFileExists = true,
-                Title = "Cointracking.INFO transactions",
+                Title = "HNT Cointracking.INFO transactions",
                 DefaultExt = ".csv",
-                Filter = "CoinTrackingInfo transactions|*.csv"
+                Filter = "HNT CoinTrackingInfo transactions|*.csv"
             };
             if (a.ShowDialog() ?? false)
             {

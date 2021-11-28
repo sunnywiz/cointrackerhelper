@@ -45,13 +45,13 @@
                         <DataGrid Name="CakeDefiDataGrid" AutoGenerateColumns="True"/>
                     </DockPanel>
                 </TabItem>
-                <TabItem Name="CointrackingInfoTab" Header="HNT">
+                <TabItem Name="HNTCointrackingInfoTab" Header="HNT">
                     <DockPanel Margin="5">
                         <WrapPanel DockPanel.Dock="Top">
                             <Label>fairspot.host exporter in cointracking.info format then</Label>
-                            <Button Name="ImportCointrackingTrades" Click="ImportCointrackingTrades_Click">Import Cointracking Format Here</Button>
+                            <Button Name="ImportHNTCointrackingTrades" Click="ImportCointrackingTrades_Click">Import HNT Cointracking Format Here</Button>
                         </WrapPanel>
-                        <DataGrid Name="CointrackingInfoDataGrid" AutoGenerateColumns="True"/>
+                        <DataGrid Name="HNTCointrackingInfoDataGrid" AutoGenerateColumns="True"/>
                     </DockPanel>
                 </TabItem>
             </TabControl>
