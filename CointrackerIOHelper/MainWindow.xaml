@@ -5,20 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CointrackerIOHelper"
         mc:Ignorable="d"
-        Title="Cointracker.IO Helper" Height="450" Width="800" WindowState="Maximized">
+        Title="Cointracker.IO Helper" Height="600" Width="800" WindowState="Maximized">
     <DockPanel>
         <StackPanel DockPanel.Dock="Top">
             <WrapPanel >
                 <Label>1. Load transaction history from Cointracker.IO so that we know what to not import again</Label>
                 <Button Name="ImportCointrackerHistory" Click="ImportCointrackerHistory_OnClick">Import Cointracker History</Button>
             </WrapPanel>
+            <Label>2. Then, choose a source tab, and load that data. </Label>
         </StackPanel>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*"/>
                 <RowDefinition Height="1*"/>
             </Grid.RowDefinitions>
-            <TabControl>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <TabControl Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
                 <TabItem Name="CtExistingTab" Header="CT Existing">
                     <DataGrid Name="CtExistingGrid" AutoGenerateColumns="True"/>
                 </TabItem>
@@ -27,7 +32,6 @@
                         <WrapPanel DockPanel.Dock="Top">
                             <Label>Contact Voyager Support to get CSV in their format and</Label>
                             <Button Name="ImportVoyagerTrades" Click="ImportVoyagerTrades_OnClick">Import Voyager Format Here</Button>
-                            <Label>And review proposed Trades</Label>
                         </WrapPanel>
                         <DataGrid Name="VoyagerDataGrid" AutoGenerateColumns="True"/>
                     </DockPanel>
@@ -51,47 +55,56 @@
                     </DockPanel>
                 </TabItem>
             </TabControl>
-            <TabControl Grid.Row="1">
-                <TabItem Name="CtNewTab" Header="Proposed">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                        </Grid.RowDefinitions>
-
-                        <Label Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" FontWeight="ExtraBold">Matching</Label>
-
-                        <Label Grid.Row="1" Grid.Column="1">Wallet Name:</Label>
-                        <TextBox Grid.Row="1" Grid.Column="2" Name="MatchWalletName" MinWidth="50" Text=""
-                        TextChanged="MatchWalletName_OnTextChanged"/>
-
-                        <Label Grid.Row="2" Grid.Column="1">Matches:</Label>
-                        <ListView Grid.Row="2" Grid.Column="2" Name="MatchedWallets" />
-
-                        <Label Grid.Row="3" Grid.Column="1">Delta Minutes:</Label>
-                        <TextBox Grid.Row="3" Grid.Column="2" Name="MatchMinutes" Text="30"/>
-
-                        <Label Grid.Row="4" Grid.Column="1">Decimal Places:</Label>
-                        <TextBox Grid.Row="4" Grid.Column="2" Name="MatchDecimals" Text="4"/>
-
-                        <Button Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Name="MatchButton" Click="MatchButton_OnClick">Match</Button>
-
-                        <Button Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Name="ExportButton" Click="ExportButton_Click">Export Unmatched</Button>
-
-                        <DataGrid Grid.Row="0" Grid.Column="0" Grid.RowSpan="7" Name="CtProposedGrid" AutoGenerateColumns="true"/>
-                    </Grid>
+            <TabControl Grid.Row="1" Grid.Column="0">
+                <TabItem Name="CtNewTab" Header="Review Proposed Trades">
+                    <DataGrid Grid.Row="0" Grid.Column="0" Grid.RowSpan="7" Name="CtProposedGrid" AutoGenerateColumns="true"/>
                 </TabItem>
             </TabControl>
+            <Grid Grid.Row="1" Grid.Column="1" Margin="0 0 10 0 ">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" >3. Then Choose match parameters and Match</Label>
+
+                    <Label Grid.Row="1" Grid.Column="0">Wallet Name:</Label>
+                    <TextBox Grid.Row="1" Grid.Column="1" 
+                             Name="MatchWalletName" MinWidth="50" Text=""
+                             TextChanged="MatchWalletName_OnTextChanged"/>
+
+                    <Label Grid.Row="2" Grid.Column="0">Matches:</Label>
+                    <ListView Grid.Row="2" 
+                              Grid.Column="1" 
+                              MaxHeight="200"
+                              Name="MatchedWallets" />
+
+                    <Label Grid.Row="3" Grid.Column="0">Delta Minutes:</Label>
+                    <TextBox Grid.Row="3" Grid.Column="1" Name="MatchMinutes" Text="30"/>
+
+                    <Label Grid.Row="4" Grid.Column="0">Decimal Places:</Label>
+                    <TextBox Grid.Row="4" Grid.Column="1" Name="MatchDecimals" Text="4"/>
+
+                    <Button Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Name="MatchButton" Click="MatchButton_OnClick">Match</Button>
+
+                    <Label Margin="0 20 0 0" Grid.Row="6" Grid.ColumnSpan="2">4. Once you approve then</Label>
+                    <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Name="ExportButton" Click="ExportButton_Click">Export Unmatched</Button>
+
+                </Grid>
+
+            </Grid>
         </Grid>
     </DockPanel>
 </Window>
