@@ -47,6 +47,27 @@ namespace CointrackerIOHelper
                 var row = od[i];
                 CtImportRow result1 = null;
 
+                if (row.Type=="Deposit")
+                {
+                    result1 = new CtImportRow()
+                    {
+                        Date = row.DateDate,
+                        ReceivedCurrency = row.BuyCurrency,
+                        ReceivedQuantity = row.BuyAmount,
+                        Tag = (row.Comment ?? "").StartsWith("Staking Reward") ? "mined" : ""
+                    };
+                } else if (row.Type== "Withdrawal" && row.SellCurrency == row.FeeCurrency)
+                {
+                    result1 = new CtImportRow()
+                    {
+                        Date = row.DateDate,
+                        SentQuantity = row.SellAmount + row.FeeAmount,
+                        SentCurrency = row.SellCurrency,
+                        FeeAmount = row.FeeAmount,
+                        FeeCurrency = row.FeeCurrency
+                    };
+                }
+
                 if (result1 != null)
                 {
                     row.ConvertInfo = result1.ToString();
