@@ -36,6 +36,7 @@ namespace CointrackerIOHelper
 
         public HNTCointrackingInfoHelper HNTCointrackingInfoHelper { get; set; }
 
+        public CointrackingInfoHelper CointrackingInfoHelper { get; set; }
         public MainWindow()
         {
             InitializeComponent();
@@ -47,6 +48,7 @@ namespace CointrackerIOHelper
             CakeDefiHelper = new CakeDefiHelper();
             HNTCointrackingInfoHelper= new HNTCointrackingInfoHelper();
             CardanoYoroiHelper = new CardanoYoroiHelper();
+            CointrackingInfoHelper = new CointrackingInfoHelper();
 
             UpdateDependencies();
         }
@@ -311,6 +313,17 @@ namespace CointrackerIOHelper
 
                 CtProposedGrid.ItemsSource = CtProposedData;
                 CtNewTab.IsSelected = true;
+
+                UpdateDependencies();
+            }
+        }
+
+        private void ImportCointrackingInfo_Click(object sender, RoutedEventArgs e)
+        {
+            if (CointrackingInfoHelper.ChooseAndReadFile())
+            {
+                CointrackingInfoTab.IsSelected = true;
+                CointrackingInfoDataGrid.ItemsSource = CointrackingInfoHelper.Data;
 
                 UpdateDependencies();
             }

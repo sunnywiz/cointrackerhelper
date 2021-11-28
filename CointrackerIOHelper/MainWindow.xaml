@@ -97,10 +97,14 @@
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
 
-                            <Label Grid.ColumnSpan="2">Trade List, Full, CSV, Comma, then</Label>
+                            <Label Grid.ColumnSpan="2">
+                                Enter Coins, Overview, Export, CSV</Label>
                             <Button Style="{DynamicResource RoundButton}" 
                                     Grid.Row="1" Grid.ColumnSpan="2" 
-                                    Name="ImportCointrackingInfo">Import 'Trade List Full.csv'</Button>
+                                    Name="ImportCointrackingInfo"
+                                    Click="ImportCointrackingInfo_Click">
+                                'Trade Table.csv'
+                            </Button>
 
                             <Label Grid.Row="3">Then Filter Exchanges:</Label>
                             <TextBox MinWidth="30" Grid.Row="3" Grid.Column="1" Name="CointrackingInfoFilterExchangesText" />
