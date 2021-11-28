@@ -12,42 +12,6 @@
                 <Label>1. Load transaction history from Cointracker.IO so that we know what to not import again</Label>
                 <Button Name="ImportCointrackerHistory" Click="ImportCointrackerHistory_OnClick">Import Cointracker History</Button>
             </WrapPanel>
-            <WrapPanel >
-                <Label FontWeight="ExtraBold">Voyager</Label>
-                <Label>Contact Voyager Support to get CSV in their format and</Label>
-                <Button Name="ImportVoyagerTrades" Click="ImportVoyagerTrades_OnClick">Import Voyager Format Here</Button>
-                <Label>And review proposed Trades</Label>
-            </WrapPanel>
-            <WrapPanel>
-                <Label FontWeight="ExtraBold">Cake Defi</Label>
-                <Label>Transactions, export, and then </Label>
-                <Button Name="ImportCakeDefiTrades" Click="ImportCakeDefiTrades_OnClick">Import CakeDefi Format Here</Button>
-            </WrapPanel>
-            <WrapPanel>
-                <Label FontWeight="ExtraBold">Cointracking Format Import</Label>
-                <Label>various sources export, then </Label>
-                <Button Name="ImportCointrackingTrades" Click="ImportCointrackingTrades_Click">Import Cointracking Format Here</Button>
-            </WrapPanel>
-            <WrapPanel MaxHeight="100">
-                <Label FontWeight="ExtraBold">Matching</Label>
-                <Label>Type wallet name</Label>
-                <TextBox Name="MatchWalletName" Text="Voyager"
-                     TextChanged="MatchWalletName_OnTextChanged"/>
-                <Label>matches:</Label>
-                <ListView Name="MatchedWallets" />
-            </WrapPanel>
-            <WrapPanel>
-                <Label>Timestamp Delta Minutes:</Label>
-                <TextBox Name="MatchMinutes" Text="30"/>
-                <Label>Decimal Places:</Label>
-                <TextBox Name="MatchDecimals" Text="4"/>
-                <Label>minutes And then</Label>
-                <Button Name="MatchButton" Click="MatchButton_OnClick">Match</Button>
-            </WrapPanel>
-            <WrapPanel>
-                <Label>Export unmatched trades: </Label>
-                <Button Name="ExportButton" Click="ExportButton_Click">Export</Button>
-            </WrapPanel>
         </StackPanel>
         <Grid>
             <Grid.RowDefinitions>
@@ -59,20 +23,74 @@
                     <DataGrid Name="CtExistingGrid" AutoGenerateColumns="True"/>
                 </TabItem>
                 <TabItem Name="VoyagerTab" Header="Voyager">
-                    <DataGrid Name="VoyagerDataGrid" AutoGenerateColumns="True"/>
+                    <DockPanel Margin="5">
+                        <WrapPanel DockPanel.Dock="Top">
+                            <Label>Contact Voyager Support to get CSV in their format and</Label>
+                            <Button Name="ImportVoyagerTrades" Click="ImportVoyagerTrades_OnClick">Import Voyager Format Here</Button>
+                            <Label>And review proposed Trades</Label>
+                        </WrapPanel>
+                        <DataGrid Name="VoyagerDataGrid" AutoGenerateColumns="True"/>
+                    </DockPanel>
                 </TabItem>
                 <TabItem Name="CakeDefiTab" Header="CakeDefi">
-                    <DataGrid Name="CakeDefiDataGrid" AutoGenerateColumns="True"/>
+                    <DockPanel Margin="5">
+                        <WrapPanel DockPanel.Dock="Top">
+                            <Label>Transactions, export, and then</Label>
+                            <Button Name="ImportCakeDefiTrades" Click="ImportCakeDefiTrades_OnClick">Import CakeDefi Format Here</Button>
+                        </WrapPanel>
+                        <DataGrid Name="CakeDefiDataGrid" AutoGenerateColumns="True"/>
+                    </DockPanel>
                 </TabItem>
-                <TabItem Name="CointrackingInfoTab" Header="Cointracking.Info">
-                    <DataGrid Name="CointrackingInfoDataGrid" AutoGenerateColumns="True"/>
+                <TabItem Name="CointrackingInfoTab" Header="HNT">
+                    <DockPanel Margin="5">
+                        <WrapPanel DockPanel.Dock="Top">
+                            <Label>fairspot.host exporter in cointracking.info format then</Label>
+                            <Button Name="ImportCointrackingTrades" Click="ImportCointrackingTrades_Click">Import Cointracking Format Here</Button>
+                        </WrapPanel>
+                        <DataGrid Name="CointrackingInfoDataGrid" AutoGenerateColumns="True"/>
+                    </DockPanel>
                 </TabItem>
             </TabControl>
             <TabControl Grid.Row="1">
                 <TabItem Name="CtNewTab" Header="Proposed">
-                    <DataGrid Name="CtProposedGrid" AutoGenerateColumns="true"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Label Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" FontWeight="ExtraBold">Matching</Label>
+
+                        <Label Grid.Row="1" Grid.Column="1">Wallet Name:</Label>
+                        <TextBox Grid.Row="1" Grid.Column="2" Name="MatchWalletName" MinWidth="50" Text=""
+                        TextChanged="MatchWalletName_OnTextChanged"/>
+
+                        <Label Grid.Row="2" Grid.Column="1">Matches:</Label>
+                        <ListView Grid.Row="2" Grid.Column="2" Name="MatchedWallets" />
+
+                        <Label Grid.Row="3" Grid.Column="1">Delta Minutes:</Label>
+                        <TextBox Grid.Row="3" Grid.Column="2" Name="MatchMinutes" Text="30"/>
+
+                        <Label Grid.Row="4" Grid.Column="1">Decimal Places:</Label>
+                        <TextBox Grid.Row="4" Grid.Column="2" Name="MatchDecimals" Text="4"/>
+
+                        <Button Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Name="MatchButton" Click="MatchButton_OnClick">Match</Button>
+
+                        <Button Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Name="ExportButton" Click="ExportButton_Click">Export Unmatched</Button>
+
+                        <DataGrid Grid.Row="0" Grid.Column="0" Grid.RowSpan="7" Name="CtProposedGrid" AutoGenerateColumns="true"/>
+                    </Grid>
                 </TabItem>
-                <TabItem Name="CtUploadTab" Header="CT Upload"/>
             </TabControl>
         </Grid>
     </DockPanel>
