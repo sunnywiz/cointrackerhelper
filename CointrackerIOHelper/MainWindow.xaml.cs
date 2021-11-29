@@ -37,6 +37,9 @@ namespace CointrackerIOHelper
         public HNTCointrackingInfoHelper HNTCointrackingInfoHelper { get; set; }
 
         public CointrackingInfoHelper CointrackingInfoHelper { get; set; }
+
+        public List<CointrackingInfoHelper.Row> CointrackingInfoFilteredData { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -49,6 +52,7 @@ namespace CointrackerIOHelper
             HNTCointrackingInfoHelper= new HNTCointrackingInfoHelper();
             CardanoYoroiHelper = new CardanoYoroiHelper();
             CointrackingInfoHelper = new CointrackingInfoHelper();
+            CointrackingInfoFilteredData = new List<CointrackingInfoHelper.Row>(); 
 
             UpdateDependencies();
         }
@@ -80,14 +84,66 @@ namespace CointrackerIOHelper
         public void UpdateDependencies()
         {
             ImportVoyagerTrades.IsEnabled = true;  // can import at any time
-            
+
             // MatchedWallets depends on CTData having data and the MatchWalletName
+            UpdateCtExistingDataWithMatches();
+
+            UpdateCointrackingInfoDataWithMatches(); 
+
+            // MatchButton is dependent on Proposed Trades being there
+            MatchButton.IsEnabled = CtProposedData?.Count > 0;
+
+            ExportButton.IsEnabled = CtProposedData?.Any(x => String.IsNullOrEmpty(x.MatchInfo)) ?? false;
+        }
+
+        private void UpdateCointrackingInfoDataWithMatches()
+        {
+            if (CointrackingInfoHelper.Data.Any())
+            {
+                CointrackingInfoFilteredData.Clear(); 
+                if (String.IsNullOrEmpty(CointrackingInfoFilterExchangesText.Text))
+                {
+                    CointrackingInfoFilteredData.AddRange(CointrackingInfoHelper.Data);
+                    CointrackingInfoMatchedExchanges.Items.Clear(); 
+                } else
+                {
+                    Dictionary<string, bool> a = new Dictionary<string, bool>();
+                    foreach (var row in CointrackingInfoHelper.Data)
+                    {
+                        bool match = false;
+                        if (!String.IsNullOrEmpty(row.Exchange) &&
+                            row.Exchange.Contains(CointrackingInfoFilterExchangesText.Text))
+                        {
+                            a[row.Exchange] = true;
+                            match = true;
+                        }
+
+                        if (match) CointrackingInfoFilteredData.Add(row);
+                    }
+
+                    CointrackingInfoMatchedExchanges.Items.Clear();
+                    foreach (var b in a.Keys.OrderBy(x => x))
+                    {
+                        CointrackingInfoMatchedExchanges.Items.Add(b);
+                    }
+
+                }
+            } else
+            {
+                CointrackingInfoMatchedExchanges.Items.Clear();
+                CointrackingInfoFilteredData.Clear(); 
+            }
+            CointrackingInfoDataGrid.ItemsSource = null;
+            CointrackingInfoDataGrid.ItemsSource = CointrackingInfoFilteredData; 
+        }
+
+        private void UpdateCtExistingDataWithMatches()
+        {
             if (CtExistingData.Any())
             {
-                CtExistingFilteredData.Clear(); 
+                CtExistingFilteredData.Clear();
                 if (String.IsNullOrEmpty(MatchWalletName.Text))
                 {
-                    CtExistingFilteredData.Clear(); 
                     CtExistingFilteredData.AddRange(CtExistingData);
                     MatchedWallets.Items.Clear();
                 }
@@ -96,22 +152,22 @@ namespace CointrackerIOHelper
                     Dictionary<string, bool> a = new Dictionary<string, bool>();
                     foreach (var row in CtExistingData)
                     {
-                        bool match = false; 
+                        bool match = false;
                         if (!String.IsNullOrEmpty(row.ReceivedWallet) &&
                             row.ReceivedWallet.Contains(MatchWalletName.Text))
                         {
                             a[row.ReceivedWallet] = true;
-                            match = true; 
+                            match = true;
                         }
 
                         if (!String.IsNullOrEmpty(row.SentWallet) &&
                             row.SentWallet.Contains(MatchWalletName.Text))
                         {
                             a[row.SentWallet] = true;
-                            match = true; 
+                            match = true;
                         }
 
-                        if (match) CtExistingFilteredData.Add(row); 
+                        if (match) CtExistingFilteredData.Add(row);
                     }
 
                     MatchedWallets.Items.Clear();
@@ -123,17 +179,11 @@ namespace CointrackerIOHelper
             }
             else
             {
-               MatchedWallets.Items.Clear();
-               CtExistingFilteredData.Clear(); 
+                MatchedWallets.Items.Clear();
+                CtExistingFilteredData.Clear();
             }
-
             CtExistingGrid.ItemsSource = null;
-            CtExistingGrid.ItemsSource = CtExistingFilteredData; 
-
-            // MatchButton is dependent on Proposed Trades being there
-            MatchButton.IsEnabled = CtProposedData?.Count > 0;
-
-            ExportButton.IsEnabled = CtProposedData?.Any(x => String.IsNullOrEmpty(x.MatchInfo)) ?? false;
+            CtExistingGrid.ItemsSource = CtExistingFilteredData;
         }
 
         private void ImportVoyagerTrades_OnClick(object sender, RoutedEventArgs e)
@@ -323,10 +373,23 @@ namespace CointrackerIOHelper
             if (CointrackingInfoHelper.ChooseAndReadFile())
             {
                 CointrackingInfoTab.IsSelected = true;
-                CointrackingInfoDataGrid.ItemsSource = CointrackingInfoHelper.Data;
 
+                // this applies the exchange name match
                 UpdateDependencies();
             }
+        }
+
+        private void CointrackingInfoFilterExchangesText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (CointrackingInfoHelper?.Data?.Count != null && !String.IsNullOrEmpty(CointrackingInfoFilterExchangesText.Text))
+            {
+                UpdateDependencies();
+            }
+            else
+            {
+                CointrackingInfoMatchedExchanges?.Items?.Clear();
+            }
+
         }
     }
 }

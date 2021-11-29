@@ -80,7 +80,7 @@
                         <DataGrid Name="CardanoYoroiDataGrid" AutoGenerateColumns="True"/>
                     </DockPanel>
                 </TabItem>
-                <TabItem Name="CointrackingInfoTab" Header="Cointracking.Info Export">
+                <TabItem Name="CointrackingInfoTab" Header="Cointracking.Info">
                     <DockPanel Margin="5">
                         <Grid DockPanel.Dock="Right">
                             <Grid.RowDefinitions>
@@ -107,7 +107,10 @@
                             </Button>
 
                             <Label Grid.Row="3">Then Filter Exchanges:</Label>
-                            <TextBox MinWidth="30" Grid.Row="3" Grid.Column="1" Name="CointrackingInfoFilterExchangesText" />
+                            <TextBox MinWidth="30" 
+                                     Grid.Row="3" Grid.Column="1" 
+                                     Name="CointrackingInfoFilterExchangesText" 
+                                     TextChanged="CointrackingInfoFilterExchangesText_TextChanged"/>
 
                             <Label Grid.Row="4">Matches:</Label>
                             <ListView Grid.Row="4" Grid.Column="1" Name="CointrackingInfoMatchedExchanges" MaxHeight="200" />
