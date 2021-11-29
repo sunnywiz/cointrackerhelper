@@ -39,13 +39,70 @@ namespace CointrackerIOHelper
 
         public List<CtImportRow> ConvertToCTImport()
         {
-            var od = Data.OrderBy(x => x.DateDate).ToList();
+            // not used
+            return null;
+        }
+
+        public List<CtImportRow> ConvertToCTImport(List<Row> filteredData)
+        {
+            var od = filteredData.OrderBy(x => x.DateDate).ToList();
             var ret = new List<CtImportRow>();
 
-            for (int i=0; i<od.Count; i++)
+            for (int i = 0; i < od.Count; i++)
             {
                 var row = od[i];
-                CtImportRow result1 = null; 
+                CtImportRow result1 = null;
+
+                if (row.Type == "Deposit")
+                {
+                    result1 = new CtImportRow()
+                    {
+                        Date = row.DateDate,
+                        ReceivedCurrency = row.BuyCurrency,
+                        ReceivedQuantity = row.Buy,
+                    };
+                }
+                else if (row.Type == "Trade")
+                {
+                    result1 = new CtImportRow()
+                    {
+                        Date = row.DateDate,
+                        ReceivedCurrency = row.BuyCurrency,
+                        ReceivedQuantity = row.Buy,
+                        SentCurrency = row.SellCurrency,
+                        SentQuantity = row.Sell,
+                        FeeAmount = row.Fee,
+                        FeeCurrency = row.FeeCurrency
+                    };
+                }
+                else if (row.Type == "Withdrawal")
+                {
+                    if (row.FeeCurrency == row.SellCurrency)
+                    {
+                        result1 = new CtImportRow()
+                        {
+                            Date = row.DateDate,
+                            SentCurrency = row.SellCurrency,
+                            SentQuantity = row.Sell + row.Fee,
+                            FeeAmount = row.Fee,
+                            FeeCurrency = row.FeeCurrency
+                        };
+                    }
+                    else throw new NotSupportedException("Special withdrawal case");
+                }
+                else if (row.Type == "Interest Income" || row.Type == "Reward / Bonus")
+                {
+                    string tag = "payment";
+                    if (row.Type == "Reward / Bonus" && row.Comment.Contains("Airdrop")) { tag = "airdrop"; }
+                    result1 = new CtImportRow()
+                    {
+                        Date = row.DateDate,
+                        ReceivedCurrency = row.BuyCurrency,
+                        ReceivedQuantity = row.Buy,
+                        Tag = tag
+                    };
+                }
+
                 if (result1 != null)
                 {
                     row.ConvertInfo = result1.ToString();
@@ -55,10 +112,10 @@ namespace CointrackerIOHelper
 
             return ret;
         }
-        
+
         public static string ConvertCurrency(string a)
         {
-            return a; 
+            return a;
         }
 
         public void ReadFile(string fileName)
@@ -66,7 +123,7 @@ namespace CointrackerIOHelper
             using var reader = new StreamReader(fileName);
             using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
             {
-                HasHeaderRecord = true,                
+                HasHeaderRecord = true,
                 MissingFieldFound = null
             });
             Data.AddRange(csv.GetRecords<Row>().OrderBy(x => x.DateDate));
@@ -93,9 +150,9 @@ namespace CointrackerIOHelper
             public string SellCurrency { get; set; }
 
             [Index(5)]
-            public decimal? Fee {  get; set; }
+            public decimal? Fee { get; set; }
 
-            [Index (6)]
+            [Index(6)]
             public string FeeCurrency { get; set; }
 
             [Index(7)]

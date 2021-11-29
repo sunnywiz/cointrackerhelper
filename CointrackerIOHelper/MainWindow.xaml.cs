@@ -391,5 +391,17 @@ namespace CointrackerIOHelper
             }
 
         }
+
+        private void CointrackerInfoGenerateButton_Click(object sender, RoutedEventArgs e)
+        {
+            CtProposedData.Clear();
+            CtProposedData.AddRange(CointrackingInfoHelper.ConvertToCTImport(CointrackingInfoFilteredData));
+
+            CtProposedGrid.ItemsSource = CtProposedData;
+            CtNewTab.IsSelected = true;
+
+            UpdateDependencies();
+
+        }
     }
 }

@@ -117,7 +117,11 @@
 
                             <Label Grid.Row="6">When correct,</Label>
                             <Button Style="{DynamicResource RoundButton}" 
-                                    Grid.Row="6" Grid.Column="1">Generate Proposed Trades</Button>
+                                    Grid.Row="6" Grid.Column="1"
+                                    Name="CointrackerInfoGenerateButton"
+                                    Click="CointrackerInfoGenerateButton_Click">
+                                Generate Proposed Trades
+                            </Button>
                         </Grid>
                         <DataGrid Name="CointrackingInfoDataGrid" AutoGenerateColumns="True"/>
                     </DockPanel>
