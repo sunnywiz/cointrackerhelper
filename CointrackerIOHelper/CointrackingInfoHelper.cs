@@ -64,16 +64,20 @@ namespace CointrackerIOHelper
                 }
                 else if (row.Type == "Trade")
                 {
-                    result1 = new CtImportRow()
+                    if (row.FeeCurrency == row.BuyCurrency)
                     {
-                        Date = row.DateDate,
-                        ReceivedCurrency = row.BuyCurrency,
-                        ReceivedQuantity = row.Buy,
-                        SentCurrency = row.SellCurrency,
-                        SentQuantity = row.Sell,
-                        FeeAmount = row.Fee,
-                        FeeCurrency = row.FeeCurrency
-                    };
+                        result1 = new CtImportRow()
+                        {
+                            Date = row.DateDate,
+                            ReceivedCurrency = row.BuyCurrency,
+                            ReceivedQuantity = row.Buy+row.Fee,
+                            SentCurrency = row.SellCurrency,
+                            SentQuantity = row.Sell,
+                            FeeAmount = row.Fee,
+                            FeeCurrency = row.FeeCurrency
+                        };
+                    }
+                    else throw new NotSupportedException("special case");
                 }
                 else if (row.Type == "Withdrawal")
                 {
@@ -83,7 +87,7 @@ namespace CointrackerIOHelper
                         {
                             Date = row.DateDate,
                             SentCurrency = row.SellCurrency,
-                            SentQuantity = row.Sell + row.Fee,
+                            SentQuantity = row.Sell,
                             FeeAmount = row.Fee,
                             FeeCurrency = row.FeeCurrency
                         };
