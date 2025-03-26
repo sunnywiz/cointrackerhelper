@@ -40,6 +40,9 @@ namespace CointrackerIOHelper
 
         public List<CointrackingInfoHelper.Row> CointrackingInfoFilteredData { get; set; }
 
+        public List<CtExportRow> MergeFilteredData { get; set; }
+        public List<CtImportRow> MergeProposedData { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -47,12 +50,17 @@ namespace CointrackerIOHelper
             CtExistingData = new List<CtExportRow>();
             CtExistingFilteredData = new List<CtExportRow>();
             CtProposedData = new List<CtImportRow>();
+            MergeFilteredData = new List<CtExportRow>();
+            MergeProposedData = new List<CtImportRow>();
             VoyagerHelper = new VoyagerHelper();
             CakeDefiHelper = new CakeDefiHelper();
             HNTCointrackingInfoHelper= new HNTCointrackingInfoHelper();
             CardanoYoroiHelper = new CardanoYoroiHelper();
             CointrackingInfoHelper = new CointrackingInfoHelper();
-            CointrackingInfoFilteredData = new List<CointrackingInfoHelper.Row>(); 
+            CointrackingInfoFilteredData = new List<CointrackingInfoHelper.Row>();
+
+            MergeStartDate.SelectedDate = DateTime.Now.AddYears(-1);
+            MergeEndDate.SelectedDate = DateTime.Now;
 
             UpdateDependencies();
         }
@@ -78,6 +86,7 @@ namespace CointrackerIOHelper
                 CtExistingData.AddRange(csv.GetRecords<CtExportRow>());
                 CtExistingTab.IsSelected = true; 
                 UpdateDependencies();
+                _mergeTransactionsTabInitialized = false; 
             }
         }
 
@@ -403,5 +412,185 @@ namespace CointrackerIOHelper
             UpdateDependencies();
 
         }
+
+        private bool _mergeTransactionsTabInitialized = false;
+
+        private void MergeTransactionsTab_Selected(object sender, RoutedEventArgs e)
+        {
+            if (!_mergeTransactionsTabInitialized)
+            {
+                InitializeMergeTransactionsTab();
+                _mergeTransactionsTabInitialized = true;
+            }
+        }
+
+        private void InitializeMergeTransactionsTab()
+        {
+            if (CtExistingData == null || CtExistingData.Count == 0)
+            {
+                return;
+            }
+
+            // Initialize date range to min/max of existing data
+            var minDate = CtExistingData.Where(d => d.Date.HasValue).Min(d => d.Date);
+            var maxDate = CtExistingData.Where(d => d.Date.HasValue).Max(d => d.Date);
+
+            MergeStartDate.SelectedDate = minDate;
+            MergeEndDate.SelectedDate = maxDate;
+
+            // Populate wallet dropdown
+            MergeWalletCombo.Items.Clear();
+            MergeWalletCombo.Items.Add(string.Empty); // Add empty option
+
+            var wallets = new HashSet<string>();
+            foreach (var row in CtExistingData)
+            {
+                if (!string.IsNullOrEmpty(row.ReceivedWallet))
+                    wallets.Add(row.ReceivedWallet);
+                if (!string.IsNullOrEmpty(row.SentWallet))
+                    wallets.Add(row.SentWallet);
+            }
+
+            foreach (var wallet in wallets.OrderBy(w => w))
+            {
+                MergeWalletCombo.Items.Add(wallet);
+            }
+
+            // Populate currency dropdown
+            MergeCurrencyCombo.Items.Clear();
+            MergeCurrencyCombo.Items.Add(string.Empty); // Add empty option
+
+            var currencies = new HashSet<string>();
+            foreach (var row in CtExistingData)
+            {
+                if (!string.IsNullOrEmpty(row.ReceivedCurrency))
+                    currencies.Add(row.ReceivedCurrency);
+                if (!string.IsNullOrEmpty(row.SentCurrency))
+                    currencies.Add(row.SentCurrency);
+            }
+
+            foreach (var currency in currencies.OrderBy(c => c))
+            {
+                MergeCurrencyCombo.Items.Add(currency);
+            }
+
+            // Populate transaction type dropdown
+            // Since CtExportRow doesn't have a direct transaction type field,
+            // we'll infer types from the data patterns
+            MergeTransactionTypeCombo.Items.Clear();
+            MergeTransactionTypeCombo.Items.Add(string.Empty); // Add empty option
+
+            // Common transaction types
+            var transactionTypes = new List<string>
+    {
+        "Staking reward",
+        "Mining",
+        "Deposit",
+        "Withdrawal",
+        "Trade",
+        "Transfer"
+    };
+
+            foreach (var type in transactionTypes)
+            {
+                MergeTransactionTypeCombo.Items.Add(type);
+            }
+
+            // Do initial filtering with blank criteria
+            UpdateMergeTransactionsDataGrid();
+        }
+
+        private void ApplyFilterButton_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateMergeTransactionsDataGrid();
+        }
+
+        private void MergeTransactionsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CtExistingData.Count == 0)
+            {
+                MessageBox.Show("Please import Cointracker history first.", "No Data", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Make sure we have filtered data
+            if (MergeFilteredData.Count == 0)
+            {
+                MessageBox.Show("No transactions match the current filter criteria.", "No Matching Transactions", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Create proposed data from filtered transactions
+            MergeProposedData = new List<CtImportRow>();
+
+            // For now, just convert the filtered transactions to proposed format
+            foreach (var transaction in MergeFilteredData)
+            {
+                MergeProposedData.Add(new CtImportRow
+                {
+                    Date = transaction.Date ?? DateTime.Now,
+                    ReceivedCurrency = transaction.ReceivedCurrency,
+                    ReceivedQuantity = transaction.ReceivedQuantity,
+                    SentCurrency = transaction.SentCurrency,
+                    SentQuantity = transaction.SentQuantity,
+                    FeeAmount = transaction.FeeAmount,
+                    FeeCurrency = transaction.FeeCurrency,
+                    // Comment = $"Merged from {MergeFilteredData.Count} transactions"
+                });
+            }
+
+            // Display in the proposed trades grid
+            CtProposedData.Clear();
+            CtProposedData.AddRange(MergeProposedData);
+            CtProposedGrid.ItemsSource = null;
+            CtProposedGrid.ItemsSource = CtProposedData;
+            CtNewTab.IsSelected = true;
+
+            UpdateDependencies();
+        }
+
+        private void UpdateMergeTransactionsDataGrid()
+        {
+            if (CtExistingData.Count == 0)
+            {
+                MergeFilteredData.Clear();
+                MergeTransactionsDataGrid.ItemsSource = null;
+                return;
+            }
+
+            string wallet = MergeWalletCombo.Text?.Trim() ?? "";
+            string currency = MergeCurrencyCombo.Text?.Trim() ?? "";
+            string transactionType = MergeTransactionTypeCombo.Text?.Trim() ?? "";
+            DateTime startDate = MergeStartDate.SelectedDate ?? DateTime.MinValue;
+            DateTime endDate = MergeEndDate.SelectedDate ?? DateTime.MaxValue;
+
+            // Filter transactions based on criteria
+            MergeFilteredData = CtExistingData.Where(t =>
+                (string.IsNullOrEmpty(wallet) ||
+                 (t.ReceivedWallet?.Contains(wallet) == true || t.SentWallet?.Contains(wallet) == true)) &&
+                (string.IsNullOrEmpty(currency) ||
+                 (t.ReceivedCurrency?.Equals(currency, StringComparison.OrdinalIgnoreCase) == true ||
+                  t.SentCurrency?.Equals(currency, StringComparison.OrdinalIgnoreCase) == true)) &&
+                // For transaction type, we'll need to infer it from the data
+                // This is a simplified approach - you may need to refine it based on your data
+                (string.IsNullOrEmpty(transactionType) ||
+                 (transactionType == "Staking reward" && t.ReceivedQuantity.HasValue && t.ReceivedQuantity > 0 && !t.SentQuantity.HasValue) ||
+                 (transactionType == "Mining" && t.ReceivedQuantity.HasValue && t.ReceivedQuantity > 0 && !t.SentQuantity.HasValue) ||
+                 (transactionType == "Deposit" && t.ReceivedQuantity.HasValue && t.ReceivedQuantity > 0 && !t.SentQuantity.HasValue) ||
+                 (transactionType == "Withdrawal" && t.SentQuantity.HasValue && t.SentQuantity > 0 && !t.ReceivedQuantity.HasValue) ||
+                 (transactionType == "Trade" && t.ReceivedQuantity.HasValue && t.SentQuantity.HasValue) ||
+                 (transactionType == "Transfer" && ((t.ReceivedQuantity.HasValue && !t.SentQuantity.HasValue) || (!t.ReceivedQuantity.HasValue && t.SentQuantity.HasValue)))) &&
+                t.Date.HasValue &&
+                t.Date.Value >= startDate &&
+                t.Date.Value <= endDate
+            ).ToList();
+
+            // Update the data grid
+            MergeTransactionsDataGrid.ItemsSource = null;
+            MergeTransactionsDataGrid.ItemsSource = MergeFilteredData;
+        }
+
+
+
     }
 }

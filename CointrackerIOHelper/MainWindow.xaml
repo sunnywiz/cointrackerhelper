@@ -126,6 +126,83 @@
                         <DataGrid Name="CointrackingInfoDataGrid" AutoGenerateColumns="True"/>
                     </DockPanel>
                 </TabItem>
+                <!-- Add this after the CointrackingInfoTab -->
+                <!-- Update the Merge Transactions tab in MainWindow.xaml -->
+                <TabItem Name="MergeTransactionsTab" Header="Merge Transactions" GotFocus="MergeTransactionsTab_Selected">
+                    <DockPanel Margin="5">
+                        <Grid DockPanel.Dock="Right">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="10px"/>
+                                <RowDefinition Height="auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Label Grid.ColumnSpan="2">
+                                Select parameters for merging transactions</Label>
+
+                            <Label Grid.Row="1">Wallet:</Label>
+                            <ComboBox MinWidth="150" 
+                     Grid.Row="1" Grid.Column="1" 
+                     Name="MergeWalletCombo" 
+                     IsEditable="True"/>
+
+                            <Label Grid.Row="2">Currency:</Label>
+                            <ComboBox MinWidth="150" 
+                     Grid.Row="2" Grid.Column="1" 
+                     Name="MergeCurrencyCombo"
+                     IsEditable="True"/>
+
+                            <Label Grid.Row="3">Transaction Type:</Label>
+                            <ComboBox Grid.Row="3" Grid.Column="1" 
+                      Name="MergeTransactionTypeCombo"
+                      IsEditable="True"/>
+
+                            <Label Grid.Row="4">Date Range:</Label>
+                            <Grid Grid.Row="4" Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <DatePicker Name="MergeStartDate" Grid.Column="0"/>
+                                <Label Grid.Column="1">to</Label>
+                                <DatePicker Name="MergeEndDate" Grid.Column="2"/>
+                            </Grid>
+
+                            <Button Style="{DynamicResource RoundButton}" 
+                    Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
+                    Name="ApplyFilterButton"
+                    Click="ApplyFilterButton_Click"
+                    Margin="0,5,0,5">
+                                Apply Filter
+                            </Button>
+
+                            <Label Grid.Row="6">Segments:</Label>
+                            <TextBox Grid.Row="6" Grid.Column="1" 
+                     Name="MergeSegmentsText" 
+                     Text="12"/>
+
+                            <Button Style="{DynamicResource RoundButton}" 
+                    Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2"
+                    Name="MergeTransactionsButton"
+                    Click="MergeTransactionsButton_Click">
+                                Merge Transactions
+                            </Button>
+                        </Grid>
+                        <DataGrid Name="MergeTransactionsDataGrid" AutoGenerateColumns="True"/>
+                    </DockPanel>
+                </TabItem>
+
             </TabControl>
             <TabControl Grid.Row="1" Grid.Column="0">
                 <TabItem Name="CtNewTab" Header="Review Proposed Trades">
